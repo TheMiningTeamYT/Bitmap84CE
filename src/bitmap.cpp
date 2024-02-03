@@ -13,6 +13,68 @@ extern "C" {
 #define vram ((uint16_t*)0xD40000)
 #define inputBufferSize 10*512
 
+/*
+Left to do:
+Handle indexed colors
+Handle images that are smaller/bigger than 320x240 (better than just cropping them)
+Handle negative heights
+Check for invalid values in the bitmap header
+*/
+
+// Finds the shift required to take a bitmasked value and converted to a standard range (specifically 0-255)
+// For example, for a bitmask of 0xFF00, to limit the range of the masked result to 0-255, you need to shift it right by 8
+int8_t findBitMaskShift(uint32_t bitmask) {
+    int8_t shifts = 0;
+    while (bitmask) {
+        bitmask >>= 1;
+        shifts++;
+    }
+    return shifts - 5;
+}
+
+// Implement scaling later
+// Draws a row using the conversion function provided
+void displayRGBrow(uint8_t* rowBuffer, int width, unsigned int bytesPerPixel, uint16_t* screenPointer, uint16_t(*pixelConvert)(uint8_t*)) {
+    for (unsigned int i = 0; i < width && i < 320; i++) {
+        *screenPointer = rgb888to565(rowBuffer);
+        rowBuffer += bytesPerPixel;
+        screenPointer++;
+    }
+}
+
+// Implement scaling later
+// Draws a row using the bitmasks in the BITMAPV4HEADER
+void displayBitFieldRow(uint8_t* trueRowBuffer, int width, unsigned int bytesPerPixel, uint16_t* screenPointer, bitmapInfoHeader* DIBheader) {
+    int8_t redMaskShift = findBitMaskShift(DIBheader->bV4RedMask);
+    int8_t greenMaskShift = findBitMaskShift(DIBheader->bV4GreenMask) - 1;
+    int8_t blueMaskShift = findBitMaskShift(DIBheader->bV4BlueMask);
+    uint32_t* rowBuffer = (uint32_t*) trueRowBuffer;
+    uint16_t red;
+    uint16_t green;
+    uint16_t blue;
+    for (unsigned int i = 0; i < width; i++) {
+        if (redMaskShift <= 0) {
+            red = ((*rowBuffer) & DIBheader->bV4RedMask) << (redMaskShift + 11);
+        } else {
+            red = (((*rowBuffer) & DIBheader->bV4RedMask) >> redMaskShift) << 11;
+        }
+        if (greenMaskShift <= 0) {
+            green = ((*rowBuffer) & DIBheader->bV4GreenMask) << (greenMaskShift + 5);
+        } else {
+            green = (((*rowBuffer) & DIBheader->bV4GreenMask) >> greenMaskShift) << 5;
+        }
+        if (blueMaskShift <= 0) {
+            blue = ((*rowBuffer) & DIBheader->bV4BlueMask) << blueMaskShift;
+        } else {
+            blue = ((*rowBuffer) & DIBheader->bV4BlueMask) >> blueMaskShift;
+        }
+        *screenPointer = red + green + blue;
+        trueRowBuffer += bytesPerPixel;
+        rowBuffer = (uint32_t*) trueRowBuffer;
+        screenPointer++;
+    }
+}
+
 // Assumes that init_USB has already been callled
 bool displayBitmap(const char* path, const char* name) {
     // There are almost certainly more edge cases that need to be checked for
@@ -66,10 +128,7 @@ bool displayBitmap(const char* path, const char* name) {
     // Bool for if the header is BITMAPV4HEADER compatible or not.
     // If not, it is assumed to only be BITMAPINFOHEADER compatible.
     // Any header smaller than the BITMAPINFOHEADER is assumed to not be compatible with the BITMAPINFOHEADER and thus will not be supported.
-    bool v4Header = false;
-    if (DIBheader.biSize >= 108) {
-        v4Header = true;
-    }
+    bool v4Header = DIBheader.biSize >= 108;
 
     // For now, only BI_BITFIELDS is supported because
     // for this proof of concept, the image is assumed to be in 5-6-5 BGR
@@ -80,6 +139,19 @@ bool displayBitmap(const char* path, const char* name) {
         closeFile(bitmapFile);
         return false;
     }
+
+    if (DIBheader.biCompression == BI_BITFIELDS && !v4Header) {
+        os_PutStrFull(" !Compression mode or header type wrong!");
+        delete[] inputBuffer;
+        closeFile(bitmapFile);
+        return false;
+    }
+
+    // Whether we can display the image directly
+    bool native = DIBheader.biCompression == BI_BITFIELDS && DIBheader.bV4RedMask == 0xf800 && DIBheader.bV4GreenMask == 0x7e0 && DIBheader.bV4BlueMask == 0x1f;
+
+    // How many bytes each pixel takes up
+    unsigned int bytesPerPixel = DIBheader.biBitCount/8;
 
     // How many bytes each row of the bitmap takes up
     unsigned int rowSize = (((DIBheader.biBitCount*DIBheader.biWidth)+31)/32)*4;
@@ -96,7 +168,7 @@ bool displayBitmap(const char* path, const char* name) {
         case 2:
         case 4:
         case 8:
-            rowBuffer = new uint8_t[(((DIBheader.biWidth)+3)/4)*4];
+            rowBuffer = new uint8_t[((((DIBheader.biWidth)+3)/4)*4)];
             if (DIBheader.biClrUsed == 0) {
                 palette = new uint16_t[1 << DIBheader.biBitCount];
             } else {
@@ -124,14 +196,27 @@ bool displayBitmap(const char* path, const char* name) {
     // A pointer to our current position in vram
     uint16_t* screenPointer = vram + (320*239);
 
+    // If the image doesn't fill the whole screen, adjust its starting position in vram to center the image
+    if (DIBheader.biWidth < 320) {
+        screenPointer += (320 - DIBheader.biWidth)/2;
+    }
+    if (abs(DIBheader.biHeight) < 240) {
+        // Simplifiying (x/2)*320 to x*160
+        screenPointer -= (240 - DIBheader.biHeight)*160;
+    }
+
     // Clear out screen before writing the final image
     memset(vram, 0, (320*240)*sizeof(uint16_t));
-    
+
     // No where near to finished code -- Right now this assumes the image is bottom to top and already stored in 5-6-5 BGR
-    for (unsigned int i = 0; i < abs(DIBheader.biHeight) && i < 240; i++) {
+    for (unsigned int i = 0; i < abs(DIBheader.biHeight) && screenPointer < vram + (320*240); i++) {
         // A pointer to our current position on the row buffer
         uint8_t* rowPointer = rowBuffer;
+
+        // How many bytes are left to copy from the input buffer to the row buffer
         unsigned int bytesRemainingInRow = rowSize;
+
+        // If the end of the row is outside the input buffer, copy what's in the input buffer and load the next chunk into the input buffer
         while (inputPointer + bytesRemainingInRow > inputBufferEnd) {
             memcpy(rowPointer, inputPointer, inputBufferEnd - inputPointer);
             rowPointer += inputBufferEnd - inputPointer;
@@ -145,9 +230,36 @@ bool displayBitmap(const char* path, const char* name) {
                 return false;
             }
         }
+
+        // Copy the rest of the row from the input buffer
         memcpy(rowPointer, inputPointer, bytesRemainingInRow);
+
+        // Advance the pointer into the input buffer
         inputPointer += bytesRemainingInRow;
-        memcpy(screenPointer, rowBuffer, 320*sizeof(uint16_t));
+
+        // Decide how to draw the row
+        if (DIBheader.biCompression == BI_RGB) {
+            switch (DIBheader.biBitCount) {
+                case 32:
+                    displayRGBrow(rowBuffer, DIBheader.biWidth, 4, screenPointer, rgb888to565);
+                    break;
+                case 24:
+                    displayRGBrow(rowBuffer, DIBheader.biWidth, 3, screenPointer, rgb888to565);
+                    break;
+                case 16:
+                    displayRGBrow(rowBuffer, DIBheader.biWidth, 2, screenPointer, rgb1555to565);
+                default:
+                    break;
+            }
+        } else {
+            if (native) {
+                memcpy(screenPointer, rowBuffer, 320*sizeof(uint16_t));
+            } else {
+                displayBitFieldRow(rowBuffer, DIBheader.biWidth, bytesPerPixel, screenPointer, &DIBheader);
+            }
+        }
+
+        // Move up 1 row in vram
         screenPointer -= 320;
     }
     delete[] rowBuffer;

@@ -4,7 +4,7 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/home/loganius/Downloads/CEdev/**"
+                "/home/loganius/Downloads/CEdev/include**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

@@ -40,3 +40,8 @@ enum biCompressionMode {
 };
 
 bool displayBitmap(const char* path, const char* name);
+
+extern "C" {
+    uint16_t rgb888to565(uint8_t* triplet);
+    uint16_t rgb1555to565(uint8_t* triplet);
+}
