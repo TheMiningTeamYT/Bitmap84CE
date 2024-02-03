@@ -141,11 +141,10 @@ bool readFile(fat_file_t* file, uint24_t bufferSize, void* buffer) {
     if (file == NULL) {
         return false;
     }
-    uint32_t readSize = fat_GetFileSize(file);
-    if (readSize > bufferSize - (bufferSize%MSD_BLOCK_SIZE)) {
-        readSize = bufferSize - (bufferSize%MSD_BLOCK_SIZE);
+    uint32_t readSize = ((fat_GetFileSize(file) + 511)/MSD_BLOCK_SIZE) - fat_GetFileBlockOffset(file);
+    if (readSize * MSD_BLOCK_SIZE > bufferSize) {
+        readSize = bufferSize/MSD_BLOCK_SIZE;
     }
-    readSize = (readSize + 511)/MSD_BLOCK_SIZE;
     bool good = fat_ReadFile(file, readSize, buffer) == readSize;
     return good;
 }

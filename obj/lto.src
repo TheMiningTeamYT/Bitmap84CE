@@ -783,42 +783,18 @@ _readFile:
 	push	ix
 	ld	ix, 0
 	add	ix, sp
-	lea	hl, ix - 4
+	lea	hl, ix - 6
 	ld	sp, hl
 	ld	hl, (ix + 6)
 	xor	a, a
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	jp	z, BB5_7
+	jp	z, BB5_5
 	push	hl
 	call	_fat_GetFileSize
-	push	hl
-	pop	iy
-	pop	hl
-	ld	hl, (ix + 9)
-	ld	bc, -512
-	call	__iand
-	push	hl
 	pop	bc
-	ld	d, 0
-	lea	hl, iy
-	ld	a, d
-	call	__lcmpu
-	ccf
-	sbc	a, a
-	inc	a
-	bit	0, a
-	jr	nz, BB5_3
-	push	bc
-	pop	iy
-BB5_3:
 	ld	bc, 511
-	bit	0, a
-	jr	nz, BB5_5
-	ld	e, d
-BB5_5:
-	lea	hl, iy
 	xor	a, a
 	call	__ladd
 	push	hl
@@ -826,11 +802,43 @@ BB5_5:
 	ld	a, e
 	ld	l, 9
 	call	__lshru
-	ld	(ix - 4), bc
-	ld	(ix - 1), a
+	ld	(ix - 3), bc
+	ld	(ix - 6), a
+	ld	hl, (ix + 6)
+	push	hl
+	call	_fat_GetFileBlockOffset
+	push	hl
+	pop	bc
+	pop	hl
+	ld	d, 0
+	ld	hl, (ix - 3)
+	ld	e, (ix - 6)
+	ld	a, d
+	call	__lsub
+	push	hl
+	pop	bc
+	ld	a, e
+	push	bc
+	pop	iy
+	ld	(ix - 3), a
+	ld	l, 9
+	call	__lshl
+	ld	hl, (ix + 9)
+	ld	e, d
+	call	__lcmpu
+	jr	nc, BB5_3
+	ld	c, 9
+	ld	hl, (ix + 9)
+	call	__ishru
+	push	hl
+	pop	iy
+	xor	a, a
+	ld	(ix - 3), a
+BB5_3:
 	ld	hl, (ix + 12)
 	push	hl
-	push	bc
+	ld	(ix - 6), iy
+	push	iy
 	ld	hl, (ix + 6)
 	push	hl
 	call	_fat_ReadFile
@@ -839,17 +847,17 @@ BB5_5:
 	ld	hl, 9
 	add	hl, sp
 	ld	sp, hl
-	ld	hl, (ix - 4)
-	ld	e, (ix - 1)
 	xor	a, a
+	ld	hl, (ix - 6)
+	ld	e, (ix - 3)
 	call	__lcmpu
-	jr	z, BB5_8
+	jr	z, BB5_6
 	ld	a, 0
-BB5_7:
+BB5_5:
 	ld	sp, ix
 	pop	ix
 	ret
-BB5_8:
+BB5_6:
 	ld	a, -1
 	ld	sp, ix
 	pop	ix
@@ -1345,7 +1353,7 @@ BB9_6:
 	ld	a, (iy - 1)
 	cp	a, 47
 	jr	z, BB9_8
-	ld	bc, _.str.2.6
+	ld	bc, _.str.2.7
 	ld	hl, 256
 	or	a, a
 	sbc	hl, de
@@ -1451,7 +1459,7 @@ __Z13displayBitmapPKcS0_:
 	push	ix
 	ld	ix, 0
 	add	ix, sp
-	lea	hl, ix - 22
+	lea	hl, ix - 33
 	ld	sp, hl
 	ld	hl, (ix + 6)
 	ld	de, (ix + 9)
@@ -1472,7 +1480,7 @@ __Z13displayBitmapPKcS0_:
 	pop	ix
 	ret
 BB11_2:
-	ld	de, 10240
+	ld	de, 20480
 	push	de
 	ld	(ix - 3), hl
 	call	__Znaj
@@ -1481,47 +1489,68 @@ BB11_2:
 	ld	hl, (ix - 3)
 	push	hl
 	call	_fat_GetFileSize
-	ld	bc, 10240
-	pop	iy
-	ld	d, c
-	ld	a, d
-	call	__lcmpu
-	ccf
-	sbc	a, a
-	inc	a
-	bit	0, a
-	jr	nz, BB11_4
-	push	bc
-	pop	hl
-BB11_4:
+	pop	bc
 	ld	bc, 511
-	bit	0, a
-	jr	nz, BB11_6
-	ld	e, d
-BB11_6:
-	ld	a, d
+	xor	a, a
 	call	__ladd
 	push	hl
 	pop	bc
 	ld	a, e
 	ld	l, 9
 	call	__lshru
-	ld	(ix - 12), bc
+	ld	(ix - 9), bc
+	ld	(ix - 12), a
+	ld	hl, (ix - 3)
+	push	hl
+	call	_fat_GetFileBlockOffset
+	push	hl
+	pop	bc
+	pop	hl
+	xor	a, a
+	ld	hl, (ix - 9)
+	ld	e, (ix - 12)
+	call	__lsub
+	push	hl
+	pop	iy
+	ld	d, e
+	lea	bc, iy
+	ld	a, d
+	ld	l, 9
+	call	__lshl
+	ld	hl, 20480
+	ld	e, l
+	call	__lcmpu
+	ccf
+	sbc	a, a
+	inc	a
+	bit	0, a
+	ld	hl, 40
+	push	hl
+	pop	bc
+	jr	nz, BB11_4
+	lea	bc, iy
+BB11_4:
+	bit	0, a
+	ld	a, 0
+	jr	nz, BB11_6
+	ld	a, d
+BB11_6:
 	ld	(ix - 9), a
 	ld	hl, (ix - 6)
 	push	hl
 	push	bc
 	ld	hl, (ix - 3)
 	push	hl
+	ld	(ix - 12), bc
 	call	_fat_ReadFile
 	push	hl
 	pop	bc
 	ld	hl, 9
 	add	hl, sp
 	ld	sp, hl
-	xor	a, a
 	ld	hl, (ix - 12)
 	ld	e, (ix - 9)
+	xor	a, a
 	call	__lcmpu
 	jp	nz, BB11_10
 	ld	iy, (ix - 6)
@@ -1530,20 +1559,25 @@ BB11_6:
 	or	a, a
 	sbc.sis	hl, de
 	jr	nz, BB11_11
-	ld	bc, 40
 	ld	hl, (iy + 10)
-	ld	(ix - 15), hl
+	ld	(ix - 18), hl
 	ld	hl, (iy + 14)
 	ld	de, (iy + 18)
-	ld	(ix - 9), de
-	ld	a, (iy + 21)
-	ld	(ix - 12), a
-	ld	de, (iy + 28)
-	ld	(ix - 18), de
+	ld	(ix - 12), de
+	ld	d, (iy + 21)
+	ld	bc, (iy + 22)
+	ld	(ix - 15), bc
+	ld	bc, (iy + 28)
+	ld	(ix - 9), bc
+	ld	bc, (iy + 46)
+	ld	(ix - 21), bc
+	ld	a, (iy + 49)
+	ld	(ix - 24), a
 	ld	e, (iy + 17)
+	ld	bc, 40
 	xor	a, a
 	call	__lcmpu
-	jr	nc, BB11_13
+	jr	nc, BB11_15
 	ld	hl, _.str.2
 	jr	BB11_12
 BB11_10:
@@ -1554,6 +1588,7 @@ BB11_11:
 BB11_12:
 	push	hl
 	call	_os_PutStrFull
+BB11_13:
 	pop	hl
 	ld	hl, (ix - 6)
 	push	hl
@@ -1567,34 +1602,34 @@ BB11_12:
 	ld	hl, (ix - 3)
 	push	hl
 	call	_free
+BB11_14:
 	pop	hl
 	xor	a, a
 	ld	sp, ix
 	pop	ix
 	ret
-BB11_13:
-	ld	d, (ix - 12)
+BB11_15:
+	ld	bc, 3
 	ld	iy, (ix - 6)
 	ld	hl, (iy + 30)
 	ld	e, (iy + 33)
-	ld	(ix - 21), hl
-	ld	(ix - 22), e
 	call	__lcmpzero
-	jr	z, BB11_15
-	ld	hl, (ix - 21)
-	ld	e, (ix - 22)
-	ld	bc, 3
+	jr	z, BB11_17
 	xor	a, a
 	call	__lcmpu
-	jp	nz, BB11_18
-BB11_15:
-	ld	bc, 0
-	ld	iy, (ix - 18)
-	ld	c, iyl
-	ld	b, iyh
-	xor	a, a
+	jp	nz, BB11_22
+BB11_17:
+	ld	iy, 0
 	ld	hl, (ix - 9)
+	ex	de, hl
+	ld	iyl, e
+	ld	iyh, d
+	ex	de, hl
+	xor	a, a
+	ld	hl, (ix - 12)
+	ld	(ix - 30), d
 	ld	e, d
+	lea	bc, iy
 	call	__lmulu
 	ld	bc, 31
 	call	__ladd
@@ -1602,21 +1637,29 @@ BB11_15:
 	call	__ldivs
 	ld	c, 2
 	call	__ishl
-	ld	a, d
-	push	hl
-	pop	de
-	ex	de, hl
-	ld	e, iyl
-	ld	d, iyh
-	ex	de, hl
-	ld.sis	bc, 9
-	or	a, a
-	sbc.sis	hl, bc
-	ld	(ix - 18), de
-	jr	nc, BB11_17
-	ld	iy, 4
+	ld	(ix - 27), hl
 	ld	hl, (ix - 9)
-	ld	e, a
+	ex	de, hl
+	ld	iyl, e
+	ld	iyh, d
+	ex	de, hl
+	dec.sis	iy
+	ld	bc, 32
+	lea	de, iy
+	lea	hl, iy
+	or	a, a
+	sbc	hl, bc
+	jp	nc, BB11_21
+	ld	hl, JTI11_0
+	add	hl, de
+	add	hl, de
+	add	hl, de
+	ld	hl, (hl)
+	jp	(hl)
+BB11_19:
+	ld	iy, 4
+	ld	hl, (ix - 12)
+	ld	e, (ix - 30)
 	ld	bc, 3
 	xor	a, a
 	call	__ladd
@@ -1625,77 +1668,310 @@ BB11_15:
 	ld	c, 2
 	call	__ishl
 	push	hl
-	pop	de
-BB11_17:
-	push	de
 	call	__Znaj
-	ld	(ix - 9), hl
+	ld	(ix - 12), hl
 	pop	hl
-	ld	iy, (ix - 6)
-	ld	de, (ix - 15)
-	add	iy, de
-	ld	hl, (ix - 18)
+	ld	hl, (ix - 21)
+	ld	e, (ix - 24)
+	call	__lcmpzero
+	jp	nz, BB11_24
+	ld	hl, 2
+	ld	bc, (ix - 9)
+	call	__ishl
 	push	hl
-	push	iy
-	ld	hl, -2883584
+	jr	BB11_27
+BB11_21:
+	ld	hl, _.str.4
+	push	hl
+	call	_os_PutStrFull
+	pop	hl
+	ld	hl, (ix - 6)
+	push	hl
+	call	__ZdaPv
+	pop	hl
+	ld	hl, (ix - 3)
+	push	hl
+	call	_closeFile
+	jp	BB11_14
+BB11_22:
+	ld	hl, _.str.3
+	jp	BB11_12
+BB11_23:
+	ld	hl, (ix - 27)
+	push	hl
+	call	__Znaj
+	ld	(ix - 12), hl
+	jr	BB11_28
+BB11_24:
+	push	hl
+	pop	de
+	push	hl
+	pop	iy
+	add	iy, de
+	add	hl, de
+	ld	de, -1
+	jr	c, BB11_26
+	lea	de, iy
+BB11_26:
+	push	de
+BB11_27:
+	call	__Znaj
+BB11_28:
+	pop	hl
+	ld	de, (ix - 15)
+	push	de
+	pop	hl
+	push	de
+	pop	iy
+	add	iy, iy
+	sbc	hl, hl
+	push	hl
+	pop	bc
+	push	de
+	pop	hl
+	add	hl, bc
+	call	__ixor
+	push	hl
+	pop	bc
+	ex	de, hl
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jr	nz, BB11_31
+	ld	a, 1
+	ld	(ix - 15), a
+	dec	a
+	ld	(ix - 9), a
+BB11_30:
+	ld	hl, (ix - 12)
+	push	hl
+	call	__ZdaPv
+	pop	hl
+	ld	hl, (ix - 6)
+	push	hl
+	call	__ZdaPv
+	pop	hl
+	ld	hl, (ix - 3)
+	push	hl
+	call	_closeFile
+	pop	hl
+	ld	a, (ix - 9)
+	and	a, (ix - 15)
+	xor	a, 1
+	ld	sp, ix
+	pop	ix
+	ret
+BB11_31:
+	ld	iy, -2730624
+	or	a, a
+	sbc	hl, hl
+	ld	de, (ix - 18)
+	ld	(ix - 24), bc
+BB11_32:
+	ld	(ix - 18), hl
+	ld	(ix - 30), iy
+	ld	hl, (ix - 12)
+	ld	(ix - 15), hl
+	ld	bc, (ix - 27)
+	ld	iy, (ix - 6)
+BB11_33:
+	ld	(ix - 9), bc
+	add	iy, de
+	ld	(ix - 21), iy
+	push	bc
+	pop	iy
+	add	iy, de
+	lea	hl, iy
+	ld	bc, -8388608
+	add	hl, bc
+	ld	bc, -8368127
+	or	a, a
+	sbc	hl, bc
+	jp	c, BB11_39
+	ld	hl, 20480
+	or	a, a
+	sbc	hl, de
+	ld	(ix - 33), hl
+	push	hl
+	ld	hl, (ix - 21)
+	push	hl
+	ld	hl, (ix - 15)
 	push	hl
 	call	_memcpy
 	ld	hl, 9
 	add	hl, sp
 	ld	sp, hl
+	ld	de, (ix - 33)
+	ld	hl, (ix - 15)
+	add	hl, de
+	ld	(ix - 15), hl
 	ld	hl, (ix - 9)
+	or	a, a
+	sbc	hl, de
+	ld	(ix - 9), hl
+	ld	hl, (ix - 3)
 	push	hl
-	call	__ZdaPv
-	jr	BB11_19
-BB11_18:
-	ld	hl, _.str.3
+	call	_fat_GetFileSize
+	pop	bc
+	ld	bc, 511
+	xor	a, a
+	call	__ladd
 	push	hl
-	call	_os_PutStrFull
-BB11_19:
+	pop	bc
+	ld	a, e
+	ld	l, 9
+	call	__lshru
+	ld	(ix - 21), bc
+	ld	(ix - 33), a
+	ld	hl, (ix - 3)
+	push	hl
+	call	_fat_GetFileBlockOffset
+	push	hl
+	pop	bc
 	pop	hl
+	xor	a, a
 	ld	hl, (ix - 21)
-	ld	e, (ix - 22)
-	ld	bc, 3
+	ld	e, (ix - 33)
+	call	__lsub
+	push	hl
+	pop	iy
+	ld	d, e
+	lea	bc, iy
+	ld	a, d
+	ld	l, 9
+	call	__lshl
+	ld	hl, 20480
+	ld	e, l
+	call	__lcmpu
+	ccf
+	sbc	a, a
+	inc	a
+	bit	0, a
+	ld	hl, 40
+	jr	nz, BB11_36
+	lea	hl, iy
+BB11_36:
+	bit	0, a
+	ld	a, 0
+	jr	nz, BB11_38
+	ld	a, d
+BB11_38:
+	ld	(ix - 33), a
+	ld	de, (ix - 6)
+	push	de
+	push	hl
+	ld	(ix - 21), hl
+	ld	hl, (ix - 3)
+	push	hl
+	call	_fat_ReadFile
+	ld	iy, (ix - 6)
+	push	hl
+	pop	bc
+	ld	hl, 9
+	add	hl, sp
+	ld	sp, hl
+	ld	hl, (ix - 21)
+	ld	e, (ix - 33)
 	xor	a, a
 	call	__lcmpu
-	ld	d, 1
-	ld	c, d
-	jr	z, BB11_21
-	ld	c, a
-BB11_21:
-	ld	(ix - 9), c
-	call	__lcmpzero
-	ld	hl, (ix - 6)
-	jr	z, BB11_23
-	ld	d, a
-BB11_23:
-	ld	(ix - 12), d
+	ld	hl, 0
+	ex	de, hl
+	ld	hl, _.str.1
+	ld	bc, (ix - 9)
+	jp	z, BB11_33
+	jp	BB11_41
+BB11_39:
+	ld	(ix - 33), iy
+	ld	hl, (ix - 9)
+	push	hl
+	ld	hl, (ix - 21)
+	push	hl
+	ld	hl, (ix - 15)
+	push	hl
+	call	_memcpy
+	ld	hl, 9
+	add	hl, sp
+	ld	sp, hl
+	ld	iy, (ix - 30)
+	lea	de, iy
+	ld	hl, (ix - 12)
+	ld	bc, 640
+	ldir
+	ld	hl, -640
+	ex	de, hl
+	add	iy, de
+	ld	de, (ix - 18)
+	inc	de
+	push	de
+	pop	hl
+	ld	bc, (ix - 24)
+	or	a, a
+	sbc	hl, bc
+	sbc	a, a
+	ld	(ix - 9), a
+	ld	hl, (ix - 18)
+	ld	bc, 239
+	or	a, a
+	sbc	hl, bc
+	sbc	a, a
+	ld	hl, (ix - 18)
+	or	a, a
+	sbc	hl, bc
+	ld	(ix - 15), a
+	jp	nc, BB11_30
+	push	de
+	pop	hl
+	ld	bc, (ix - 24)
+	or	a, a
+	sbc	hl, bc
+	ex	de, hl
+	ld	de, (ix - 33)
+	jp	c, BB11_32
+	jp	BB11_30
+BB11_41:
+	push	hl
+	call	_os_PutStrFull
+	pop	hl
+	ld	hl, (ix - 12)
 	push	hl
 	call	__ZdaPv
-	pop	hl
-	call	_usb_WaitForEvents
-	ld	hl, (ix - 3)
-	push	hl
-	call	_fat_CloseFile
-	pop	hl
-	ld	hl, (ix - 3)
-	push	hl
-	call	_free
-	pop	hl
-	ld	a, (ix - 12)
-	rrc	a
-	sbc	a, a
-	ld	l, a
-	ld	a, (ix - 9)
-	rrc	a
-	sbc	a, a
-	ld	e, a
-	ld	a, l
-	or	a, e
-	ld	sp, ix
-	pop	ix
-	ret
+	jp	BB11_13
 	section	.text,"ax",@progbits
+	section	.rodata,"a",@progbits
+	private	JTI11_0
+JTI11_0:
+	dl	BB11_19
+	dl	BB11_19
+	dl	BB11_21
+	dl	BB11_19
+	dl	BB11_21
+	dl	BB11_21
+	dl	BB11_21
+	dl	BB11_19
+	dl	BB11_21
+	dl	BB11_21
+	dl	BB11_21
+	dl	BB11_21
+	dl	BB11_21
+	dl	BB11_21
+	dl	BB11_21
+	dl	BB11_23
+	dl	BB11_21
+	dl	BB11_21
+	dl	BB11_21
+	dl	BB11_21
+	dl	BB11_21
+	dl	BB11_21
+	dl	BB11_21
+	dl	BB11_23
+	dl	BB11_21
+	dl	BB11_21
+	dl	BB11_21
+	dl	BB11_21
+	dl	BB11_21
+	dl	BB11_21
+	dl	BB11_21
+	dl	BB11_23
 
 	section	.text,"ax",@progbits
 	public	_main
@@ -1704,37 +1980,32 @@ _main:
 	call	_os_ClrLCDFull
 	call	_os_HomeUp
 	call	_os_DrawStatusBar
-	ld	hl, _.str.4
+	ld	hl, _.str.5
 	push	hl
 	call	_os_PutStrFull
 	pop	hl
 	call	_init_USB
 	bit	0, a
 	jr	z, BB12_8
-	ld	hl, _.str.2.6
-	ld	de, _.str.3.7
+	ld	hl, _.str.2.7
+	ld	de, _.str.3.8
 	push	de
 	push	hl
 	call	__Z13displayBitmapPKcS0_
 	ld	hl, 6
 	add	hl, sp
 	ld	sp, hl
-	ld	hl, _.str.4.8
-	push	hl
-	call	_os_PutStrFull
-	pop	hl
+	bit	0, a
+	jr	z, BB12_11
 	call	_usb_WaitForEvents
 	ld	a, (_global+1796)
 	bit	0, a
-	jr	z, BB12_3
-	ld	hl, _global+1027
-	push	hl
-	call	_fat_Close
-	pop	hl
+	jr	nz, BB12_12
 BB12_3:
 	ld	a, (_global+1795)
 	bit	0, a
 	jr	z, BB12_5
+BB12_4:
 	ld	hl, _global+3
 	push	hl
 	call	_msd_Close
@@ -1749,7 +2020,7 @@ BB12_6:
 	sbc	hl, hl
 	ret
 BB12_8:
-	ld	hl, _.str.1.5
+	ld	hl, _.str.1.6
 	push	hl
 	call	_os_PutStrFull
 	pop	hl
@@ -1759,6 +2030,24 @@ BB12_9:
 	jr	z, BB12_9
 	ld	hl, 1
 	ret
+BB12_11:
+	ld	hl, _.str.4.9
+	push	hl
+	call	_os_PutStrFull
+	pop	hl
+	call	_usb_WaitForEvents
+	ld	a, (_global+1796)
+	bit	0, a
+	jr	z, BB12_3
+BB12_12:
+	ld	hl, _global+1027
+	push	hl
+	call	_fat_Close
+	pop	hl
+	ld	a, (_global+1795)
+	bit	0, a
+	jr	nz, BB12_4
+	jr	BB12_5
 	section	.text,"ax",@progbits
 
 	section	.bss,"aw",@nobits
@@ -1794,27 +2083,32 @@ _.str.3:
 	section	.rodata,"a",@progbits
 	private	_.str.4
 _.str.4:
+	db	" !Unsupported bit depth!", 0
+
+	section	.rodata,"a",@progbits
+	private	_.str.5
+_.str.5:
 	db	"Attempting to read bitmap, please wait... Press any key to cancel.", 0
 
 	section	.rodata,"a",@progbits
-	private	_.str.1.5
-_.str.1.5:
+	private	_.str.1.6
+_.str.1.6:
 	db	" Failed to open USB. Press any key to continue.", 0
 
 	section	.rodata,"a",@progbits
-	private	_.str.2.6
-_.str.2.6:
+	private	_.str.2.7
+_.str.2.7:
 	db	"/", 0
 
 	section	.rodata,"a",@progbits
-	private	_.str.3.7
-_.str.3.7:
+	private	_.str.3.8
+_.str.3.8:
 	db	"test.bmp", 0
 
 	section	.rodata,"a",@progbits
-	private	_.str.4.8
-_.str.4.8:
-	db	" Press any key to continue.", 0
+	private	_.str.4.9
+_.str.4.9:
+	db	" Press any key to exit.", 0
 
 	ident	"clang version 15.0.0 (https://github.com/jacobly0/llvm-project 005a99ce2569373524bd881207aa4a1e98a2b238)"
 	ident	"clang version 15.0.0 (https://github.com/jacobly0/llvm-project 005a99ce2569373524bd881207aa4a1e98a2b238)"
@@ -1841,7 +2135,7 @@ _.str.4.8:
 	extern	_msd_FindPartitions
 	extern	__Znaj
 	extern	_fat_ReadFile
-	extern	__iand
+	extern	__ixor
 	extern	_fat_WriteFile
 	extern	_os_PutStrFull
 	extern	_fat_Open
@@ -1857,13 +2151,16 @@ _.str.4.8:
 	extern	_fat_Create
 	extern	_fat_SetFileSize
 	extern	_fat_CloseFile
+	extern	__lsub
 	extern	__lmulu
 	extern	__ishru
 	extern	__Unwind_SjLj_Unregister
+	extern	__lshl
 	extern	_fat_OpenFile
 	extern	_calloc
 	extern	_msd_Info
 	extern	__lcmpu
 	extern	_os_ClrLCDFull
+	extern	_fat_GetFileBlockOffset
 	extern	_msd_Write
 	extern	_usb_Init

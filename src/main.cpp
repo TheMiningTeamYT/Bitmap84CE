@@ -18,8 +18,9 @@ int main() {
         while (!os_GetCSC());
         return 1;
     }
-    displayBitmap("/", "test.bmp");
-    os_PutStrFull(" Press any key to continue.");
+    if (!displayBitmap("/", "test.bmp")) {
+        os_PutStrFull(" Press any key to exit.");
+    }
     close_USB();
     while (!os_GetCSC());
 }
