@@ -37,5 +37,5 @@ _rgb1555to565:
     and a, l ; 4
     ld d, h ; 4
     ld e, a ; 4
-    add.s hl, de ; 8
+    add hl, de ; 4
     jp (iy) ; 10

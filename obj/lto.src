@@ -1490,8 +1490,8 @@ BB11_2:
 	section	.text,"ax",@progbits
 
 	section	.text,"ax",@progbits
-	public	__Z13displayRGBrowPhijPtPFtS_E
-__Z13displayRGBrowPhijPtPFtS_E:
+	public	__Z13displayRGBRowPhijPtPFtS_E
+__Z13displayRGBRowPhijPtPFtS_E:
 	push	ix
 	ld	ix, 0
 	add	ix, sp
@@ -1521,7 +1521,8 @@ BB12_4:
 	ld	(ix - 9), de
 	ld	(ix - 6), bc
 	push	de
-	call	_rgb888to565
+	ld	hl, (ix + 18)
+	call	__indcallhl
 	ld	iy, (ix - 9)
 	ld	bc, (ix - 6)
 	ld	(ix - 12), hl
@@ -1551,12 +1552,268 @@ BB12_5:
 	section	.text,"ax",@progbits
 
 	section	.text,"ax",@progbits
+	public	__Z18displayIndexed8RowPhiPtS0_
+__Z18displayIndexed8RowPhiPtS0_:
+	push	ix
+	ld	ix, 0
+	add	ix, sp
+	push	hl
+	ld	de, (ix + 9)
+	push	de
+	pop	hl
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jr	z, BB13_5
+	dec	de
+	ld	bc, 319
+	push	de
+	pop	hl
+	or	a, a
+	sbc	hl, bc
+	jr	c, BB13_3
+	ld	de, 319
+BB13_3:
+	ld	bc, (ix + 6)
+	ld	iy, (ix + 15)
+	inc	de
+	ld	a, 1
+BB13_4:
+	ld	(ix - 3), bc
+	or	a, a
+	sbc	hl, hl
+	lea	bc, iy
+	ld	iy, (ix - 3)
+	ld	l, (iy)
+	push	bc
+	pop	iy
+	ld	c, a
+	call	__ishl
+	push	hl
+	pop	bc
+	ld	hl, (ix + 12)
+	add	hl, bc
+	ld	hl, (hl)
+	ld	(iy), l
+	ld	(iy + 1), h
+	lea	iy, iy + 2
+	dec	de
+	ld	bc, (ix - 3)
+	inc	bc
+	push	de
+	pop	hl
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jr	nz, BB13_4
+BB13_5:
+	ld	sp, ix
+	pop	ix
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	__Z17displayIndexedRowPhihPtS0_
+__Z17displayIndexedRowPhihPtS0_:
+	push	ix
+	ld	ix, 0
+	add	ix, sp
+	lea	hl, ix - 24
+	ld	sp, hl
+	ld	hl, (ix + 6)
+	ld	(ix - 6), hl
+	ld	de, (ix + 9)
+	ld	(ix - 3), de
+	ld	a, (ix + 12)
+	ld	(ix - 13), a
+	ld	hl, (ix + 15)
+	ld	(ix - 19), hl
+	ld	hl, (ix + 18)
+	ld	(ix - 16), hl
+	push	de
+	call	__Znaj
+	ld	c, (ix - 13)
+	ld	de, (ix - 3)
+	ld	(ix - 12), hl
+	pop	hl
+	ld	a, 8
+	sub	a, c
+	ld	b, a
+	push	de
+	pop	iy
+	ex	de, hl
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jp	z, BB14_9
+	scf
+	sbc	hl, hl
+	call	__ishl
+	ld	a, l
+	cpl
+	ld	(ix - 23), a
+	ld	hl, (ix - 12)
+	ld	(ix - 9), hl
+	lea	de, iy
+	ld	(ix - 24), b
+	ld	c, b
+BB14_2:
+	ld	(ix - 22), de
+	ld	de, 0
+	push	de
+	pop	hl
+	ld	iy, (ix - 6)
+	ld	l, (iy)
+	call	__ishru
+	ld	a, l
+	and	a, (ix - 23)
+	ld	hl, (ix - 9)
+	ld	(hl), a
+	ld	a, c
+	ld	l, (ix - 13)
+	cp	a, l
+	sbc	a, a
+	ld	h, a
+	ld	a, c
+	sub	a, l
+	ld	b, a
+	ld	a, h
+	ld	c, h
+	and	a, 1
+	ld	e, a
+	ld	hl, (ix - 6)
+	add	hl, de
+	ld	(ix - 6), hl
+	bit	0, c
+	ld	c, (ix - 24)
+	jr	nz, BB14_4
+	ld	c, b
+BB14_4:
+	ld	de, (ix - 22)
+	dec	de
+	ld	hl, (ix - 9)
+	inc	hl
+	ld	(ix - 9), hl
+	push	de
+	pop	hl
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	ld	iy, (ix - 3)
+	jp	nz, BB14_2
+	lea	hl, iy
+	dec	hl
+	ld	bc, 319
+	push	hl
+	pop	iy
+	or	a, a
+	sbc	hl, bc
+	jr	c, BB14_7
+	ld	de, 319
+	push	de
+	pop	iy
+BB14_7:
+	inc	iy
+	ld	a, 1
+	ld	de, (ix - 12)
+BB14_8:
+	ld	(ix - 6), de
+	ld	(ix - 3), iy
+	or	a, a
+	sbc	hl, hl
+	ld	iy, (ix - 6)
+	ld	l, (iy)
+	ld	c, a
+	call	__ishl
+	push	hl
+	pop	bc
+	ld	hl, (ix - 19)
+	add	hl, bc
+	ld	bc, (ix - 3)
+	ld	hl, (hl)
+	ld	de, (ix - 16)
+	push	de
+	pop	iy
+	ld	(iy), l
+	ld	(iy + 1), h
+	lea	iy, iy + 2
+	ld	(ix - 16), iy
+	dec	bc
+	ld	de, (ix - 6)
+	inc	de
+	push	bc
+	pop	iy
+	push	bc
+	pop	hl
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jr	nz, BB14_8
+BB14_9:
+	ld	hl, (ix - 12)
+	ld	(ix + 6), hl
+	ld	sp, ix
+	pop	ix
+	jp	__ZdaPv
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
+	public	__Z15generatePalettejPhPt
+__Z15generatePalettejPhPt:
+	push	ix
+	ld	ix, 0
+	add	ix, sp
+	lea	hl, ix - 9
+	ld	sp, hl
+	ld	de, (ix + 6)
+	push	de
+	pop	hl
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jr	z, BB15_3
+	ld	bc, (ix + 9)
+	ld	hl, (ix + 12)
+	ld	(ix - 3), hl
+BB15_2:
+	ld	(ix - 9), bc
+	ld	(ix - 6), de
+	push	bc
+	call	_rgb888to565
+	ld	iy, (ix - 9)
+	ld	c, l
+	ld	b, h
+	pop	de
+	ld	de, (ix - 6)
+	ld	hl, (ix - 3)
+	ld	(hl), c
+	inc	hl
+	ld	(hl), b
+	lea	iy, iy + 4
+	lea	bc, iy
+	dec	de
+	ld	iy, (ix - 3)
+	lea	iy, iy + 2
+	ld	(ix - 3), iy
+	push	de
+	pop	hl
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jr	nz, BB15_2
+BB15_3:
+	ld	sp, ix
+	pop	ix
+	ret
+	section	.text,"ax",@progbits
+
+	section	.text,"ax",@progbits
 	public	__Z18displayBitFieldRowPhijPtP16bitmapInfoHeader
 __Z18displayBitFieldRowPhijPtP16bitmapInfoHeader:
 	push	ix
 	ld	ix, 0
 	add	ix, sp
-	lea	hl, ix - 43
+	lea	hl, ix - 44
 	ld	sp, hl
 	ld	iy, (ix + 18)
 	ld	d, -5
@@ -1565,30 +1822,30 @@ __Z18displayBitFieldRowPhijPtP16bitmapInfoHeader:
 	ld	(ix - 17), hl
 	ld	(ix - 18), e
 	call	__lcmpzero
-	ld	(ix - 4), d
-	jr	z, BB13_3
+	ld	(ix - 1), d
+	jr	z, BB16_3
 	ld	d, -5
 	ld	iy, (ix - 17)
 	ld	e, (ix - 18)
-BB13_2:
+BB16_2:
 	lea	bc, iy
 	ld	a, e
 	ld	l, 1
 	call	__lshru
-	ld	(ix - 3), bc
+	ld	(ix - 4), bc
 	ld	(ix - 5), a
 	inc	d
 	lea	hl, iy
 	ld	bc, 2
 	xor	a, a
 	call	__lcmpu
-	ld	iy, (ix - 3)
+	ld	iy, (ix - 4)
 	ld	e, (ix - 5)
-	jr	nc, BB13_2
-BB13_3:
+	jr	nc, BB16_2
+BB16_3:
 	ld	(ix - 5), d
 	ld	a, -6
-	ld	(ix - 3), a
+	ld	(ix - 4), a
 	ld	hl, (ix + 18)
 	push	hl
 	pop	iy
@@ -1597,41 +1854,10 @@ BB13_3:
 	call	__lcmpzero
 	ld	(ix - 30), hl
 	ld	(ix - 31), e
-	jr	z, BB13_6
+	jr	z, BB16_6
 	push	hl
 	pop	iy
-BB13_5:
-	lea	bc, iy
-	ld	a, e
-	ld	l, 1
-	call	__lshru
-	ld	(ix - 8), bc
-	ld	d, a
-	ld	a, (ix - 3)
-	inc	a
-	ld	(ix - 3), a
-	lea	hl, iy
-	ld	bc, 2
-	xor	a, a
-	call	__lcmpu
-	ld	iy, (ix - 8)
-	ld	e, d
-	jr	nc, BB13_5
-BB13_6:
-	ld	hl, (ix + 9)
-	ld	(ix - 11), hl
-	ld	hl, (ix + 18)
-	push	hl
-	pop	iy
-	ld	hl, (iy + 48)
-	ld	e, (iy + 51)
-	call	__lcmpzero
-	ld	(ix - 34), hl
-	ld	(ix - 35), e
-	jr	z, BB13_9
-	push	hl
-	pop	iy
-BB13_8:
+BB16_5:
 	lea	bc, iy
 	ld	a, e
 	ld	l, 1
@@ -1647,39 +1873,121 @@ BB13_8:
 	call	__lcmpu
 	ld	iy, (ix - 8)
 	ld	e, d
-	jr	nc, BB13_8
-BB13_9:
+	jr	nc, BB16_5
+BB16_6:
+	ld	hl, (ix + 9)
+	ld	(ix - 11), hl
+	ld	hl, (ix + 18)
+	push	hl
+	pop	iy
+	ld	hl, (iy + 48)
+	ld	e, (iy + 51)
+	call	__lcmpzero
+	ld	(ix - 34), hl
+	ld	(ix - 35), e
+	jr	z, BB16_9
+	push	hl
+	pop	iy
+BB16_8:
+	lea	bc, iy
+	ld	a, e
+	ld	l, 1
+	call	__lshru
+	ld	(ix - 8), bc
+	ld	d, a
+	ld	a, (ix - 1)
+	inc	a
+	ld	(ix - 1), a
+	lea	hl, iy
+	ld	bc, 2
+	xor	a, a
+	call	__lcmpu
+	ld	iy, (ix - 8)
+	ld	e, d
+	jr	nc, BB16_8
+BB16_9:
 	ld	hl, (ix + 9)
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	jp	z, BB13_18
+	jp	z, BB16_22
+	push	af
+	ld	a, (ix - 5)
+	ld	iyl, a
+	pop	af
+	ld	a, iyl
+	rlc	a
+	sbc	hl, hl
+	push	hl
+	pop	de
+	ld	e, iyl
+	push	de
+	pop	hl
+	ld	bc, 11
+	add	hl, bc
+	push	hl
+	pop	bc
+	ld	hl, -11
+	or	a, a
+	sbc	hl, de
+	ld	a, iyl
+	add	a, -128
+	cp	a, 117
+	jr	c, BB16_12
+	push	bc
+	pop	hl
+BB16_12:
+	ld	(ix - 14), hl
+	ld	a, (ix - 4)
+	ld	l, a
+	rlc	l
+	sbc	hl, hl
+	push	hl
+	pop	de
+	ld	e, a
+	push	de
+	pop	iy
+	ld	bc, 5
+	add	iy, bc
+	ld	hl, -5
+	or	a, a
+	sbc	hl, de
+	add	a, -128
+	cp	a, 123
+	jr	c, BB16_14
+	lea	hl, iy
+BB16_14:
+	ld	(ix - 24), hl
 	ld	hl, (ix + 6)
 	ld	(ix - 8), hl
 	ld	hl, (ix + 15)
 	ld	(ix - 21), hl
-	ld	bc, 11
-	ld	e, (ix - 5)
-	ld	a, e
+	ld	c, (ix - 1)
+	ld	a, c
 	rlc	a
+	sbc	hl, hl
+	ld	l, c
+	push	hl
+	pop	de
+	push	de
+	pop	iy
+	add	iy, iy
 	sbc	hl, hl
 	push	hl
-	pop	iy
-	ld	iyl, e
-	add	iy, bc
-	ld	e, (ix - 3)
-	ld	a, e
-	rlc	a
-	sbc	hl, hl
-	ld	l, e
-	ld	de, 5
-	add	hl, de
-	ld	a, iyl
+	pop	bc
+	ex	de, hl
+	add	hl, bc
+	call	__ixor
+	ld	bc, (ix - 14)
+	ld	a, c
 	ld	(ix - 42), a
-	ld	a, l
+	ld	de, (ix - 24)
+	ld	a, e
 	ld	(ix - 43), a
-BB13_11:
-	ld	c, (ix - 4)
+	ld	a, l
+	ld	(ix - 44), a
+BB16_15:
+	ld	c, (ix - 1)
 	ld	a, c
 	rlc	a
 	sbc	hl, hl
@@ -1700,7 +2008,7 @@ BB13_11:
 	ld	e, iyl
 	call	__land
 	ld	(ix - 38), hl
-	ld	e, (ix - 3)
+	ld	e, (ix - 4)
 	ld	l, e
 	rlc	l
 	sbc	hl, hl
@@ -1766,9 +2074,9 @@ BB13_11:
 	ld	a, (ix - 5)
 	add	a, -128
 	cp	a, -127
-	jp	c, BB13_13
+	jp	c, BB16_17
 	ld	(ix - 24), hl
-BB13_13:
+BB16_17:
 	ld	bc, (ix - 30)
 	ld	a, (ix - 31)
 	ld	hl, (ix - 14)
@@ -1789,12 +2097,12 @@ BB13_13:
 	ld	h, b
 	ld	c, 5
 	call	__sshl
-	ld	a, (ix - 3)
+	ld	a, (ix - 4)
 	add	a, -128
 	cp	a, -127
-	jp	c, BB13_15
+	jp	c, BB16_19
 	ld	(ix - 27), hl
-BB13_15:
+BB16_19:
 	ld	bc, (ix - 34)
 	ld	a, (ix - 35)
 	ld	hl, (ix - 14)
@@ -1809,13 +2117,14 @@ BB13_15:
 	ld	(ix - 14), bc
 	lea	bc, iy
 	ld	a, e
+	ld	l, (ix - 44)
 	call	__lshl
-	ld	a, (ix - 4)
+	ld	a, (ix - 1)
 	add	a, -128
 	cp	a, -127
-	jr	c, BB13_17
+	jr	c, BB16_21
 	ld	bc, (ix - 14)
-BB13_17:
+BB16_21:
 	ld	hl, (ix - 24)
 	add.sis	hl, bc
 	ld	de, (ix - 27)
@@ -1835,8 +2144,8 @@ BB13_17:
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	jp	nz, BB13_11
-BB13_18:
+	jp	nz, BB16_15
+BB16_22:
 	ld	sp, ix
 	pop	ix
 	ret
@@ -1848,14 +2157,14 @@ __Z13displayBitmapPKcS0_:
 	push	ix
 	ld	ix, 0
 	add	ix, sp
-	lea	hl, ix - 95
+	ld	hl, -179
+	add	hl, sp
 	ld	sp, hl
 	ld	hl, (ix + 6)
 	ld	de, (ix + 9)
 	xor	a, a
-	ld	(ix - 4), a
+	ld	(ix - 118), a
 	ld	bc, 0
-	ld	(ix - 10), bc
 	push	bc
 	push	de
 	push	hl
@@ -1866,14 +2175,14 @@ __Z13displayBitmapPKcS0_:
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	jp	z, BB14_13
+	jp	z, BB17_13
 	ld	de, 5120
 	push	de
-	ld	(ix - 3), hl
+	ld	(ix - 117), hl
 	call	__Znaj
-	ld	(ix - 7), hl
+	ld	(ix - 121), hl
 	pop	hl
-	ld	hl, (ix - 3)
+	ld	hl, (ix - 117)
 	push	hl
 	call	_fat_GetFileSize
 	pop	bc
@@ -1885,17 +2194,17 @@ __Z13displayBitmapPKcS0_:
 	ld	a, e
 	ld	l, 9
 	call	__lshru
-	ld	(ix - 13), bc
-	ld	(ix - 16), a
-	ld	hl, (ix - 3)
+	ld	(ix - 124), bc
+	ld	(ix - 127), a
+	ld	hl, (ix - 117)
 	push	hl
 	call	_fat_GetFileBlockOffset
 	push	hl
 	pop	bc
 	pop	hl
 	xor	a, a
-	ld	hl, (ix - 13)
-	ld	e, (ix - 16)
+	ld	hl, (ix - 124)
+	ld	e, (ix - 127)
 	call	__lsub
 	push	hl
 	pop	iy
@@ -1914,194 +2223,175 @@ __Z13displayBitmapPKcS0_:
 	ld	hl, 10
 	push	hl
 	pop	bc
-	jr	nz, BB14_3
+	jr	nz, BB17_3
 	lea	bc, iy
-BB14_3:
+BB17_3:
 	bit	0, a
 	ld	a, 0
-	jr	nz, BB14_5
+	jr	nz, BB17_5
 	ld	a, d
-BB14_5:
-	ld	(ix - 13), a
-	ld	hl, (ix - 7)
+BB17_5:
+	ld	(ix - 124), a
+	ld	hl, (ix - 121)
 	push	hl
 	push	bc
-	ld	hl, (ix - 3)
+	ld	hl, (ix - 117)
 	push	hl
-	ld	(ix - 16), bc
+	ld	(ix - 127), bc
 	call	_fat_ReadFile
 	push	hl
 	pop	bc
 	ld	hl, 9
 	add	hl, sp
 	ld	sp, hl
-	ld	hl, (ix - 16)
-	ld	e, (ix - 13)
+	ld	hl, (ix - 127)
+	ld	e, (ix - 124)
 	xor	a, a
 	call	__lcmpu
-	jp	nz, BB14_9
-	ld	iy, (ix - 7)
-	ld	hl, (iy)
+	jp	nz, BB17_9
+	ld	hl, (ix - 121)
+	ld	hl, (hl)
 	ld.sis	de, 19778
 	or	a, a
 	sbc.sis	hl, de
-	jp	nz, BB14_10
+	jr	nz, BB17_10
+	ld	bc, 108
+	lea	de, ix - 114
+	ld	iy, (ix - 121)
 	ld	hl, (iy + 10)
-	ld	(ix - 50), hl
-	ld	de, (iy + 14)
-	ld	c, (iy + 17)
-	ld	hl, (iy + 18)
-	ld	(ix - 13), hl
-	ld	a, (iy + 21)
-	ld	(ix - 19), a
-	ld	hl, (iy + 22)
-	ld	(ix - 26), hl
-	ld	hl, (iy + 28)
-	ld	(ix - 23), hl
-	ld	hl, (iy + 30)
-	ld	(ix - 16), hl
-	ld	a, (iy + 33)
-	ld	(ix - 20), a
-	ld	hl, (iy + 46)
-	ld	(ix - 44), hl
-	ld	a, (iy + 49)
-	ld	(ix - 47), a
-	ld	hl, (iy + 54)
-	ld	(ix - 32), hl
-	ld	a, (iy + 57)
-	ld	(ix - 33), a
-	ld	hl, (iy + 58)
-	ld	(ix - 36), hl
-	ld	a, (iy + 61)
-	ld	(ix - 37), a
-	ld	hl, (iy + 62)
-	ld	(ix - 40), hl
-	ld	a, (iy + 65)
-	ld	(ix - 41), a
-	ld	(ix - 29), de
-	ex	de, hl
-	ld	d, c
-	ld	e, d
+	ld	(ix - 127), hl
+	lea	iy, iy + 14
+	ld	(ix - 3), bc
+	ld	bc, -130
+	lea	hl, ix
+	add	hl, bc
+	ld	(hl), de
+	lea	hl, iy
+	ld	bc, (ix - 3)
+	ldir
+	ld	hl, (ix - 114)
+	ld	e, (ix - 111)
+	ld	(ix - 124), hl
 	ld	bc, 40
-	ld	iyh, b
-	ld	a, iyh
+	xor	a, a
 	call	__lcmpu
-	jr	nc, BB14_14
+	jr	nc, BB17_14
 	ld	hl, _.str.2
-	jr	BB14_11
-BB14_9:
+	jr	BB17_11
+BB17_9:
 	ld	hl, _.str.1
-	jr	BB14_11
-BB14_10:
+	jr	BB17_11
+BB17_10:
 	ld	hl, _.str.1.2
-BB14_11:
+BB17_11:
 	push	hl
 	call	_os_PutStrFull
-BB14_12:
+BB17_12:
 	pop	hl
-	ld	hl, (ix - 7)
+	ld	hl, (ix - 121)
 	push	hl
 	call	__ZdaPv
 	pop	hl
 	call	_usb_WaitForEvents
-	ld	hl, (ix - 3)
+	ld	hl, (ix - 117)
 	push	hl
 	call	_fat_CloseFile
 	pop	hl
-	ld	hl, (ix - 3)
+	ld	hl, (ix - 117)
 	push	hl
 	call	_free
 	pop	hl
-BB14_13:
-	ld	a, (ix - 4)
+BB17_13:
+	ld	a, (ix - 118)
 	ld	sp, ix
 	pop	ix
 	ret
-BB14_14:
+BB17_14:
+	ld	bc, -134
+	lea	hl, ix
+	add	hl, bc
+	ld	(hl), e
 	ld	bc, 3
-	ld	hl, (ix - 16)
-	ld	e, (ix - 20)
+	ld	de, (ix - 124)
+	add	iy, de
+	push	ix
+	ld	de, -137
+	add	ix, de
+	ld	(ix), iy
+	pop	ix
+	ld	hl, (ix - 98)
+	ld	e, (ix - 95)
+	ld	(ix - 3), bc
+	ld	bc, -133
+	lea	iy, ix
+	add	iy, bc
+	ld	(iy), e
 	call	__lcmpzero
-	ld	a, b
-	jp	z, BB14_27
-	ld	a, iyh
+	ld	bc, (ix - 3)
+	jr	z, BB17_17
+	push	hl
+	pop	iy
+	ld	(ix - 3), bc
+	push	ix
+	ld	bc, -133
+	add	ix, bc
+	ld	e, (ix)
+	pop	ix
+	ld	bc, (ix - 3)
 	call	__lcmpu
-	jp	nz, BB14_23
+	jp	nz, BB17_24
 	ld	hl, 107
-	ld	e, iyh
-	ld	bc, (ix - 29)
-	ld	a, d
-	call	__lcmpu
-	jp	nc, BB14_24
-	ld	bc, 63488
-	ld	hl, (ix - 32)
-	ld	e, (ix - 33)
-	ld	a, iyh
-	call	__lcmpu
-	ld	d, 1
-	ld	l, c
-	ld	iyl, d
-	jr	z, BB14_19
-	ex	de, hl
-	ld	iyl, e
-	ex	de, hl
-BB14_19:
-	ld	hl, (ix - 36)
-	ld	e, (ix - 37)
-	ld	bc, 2016
-	ld	a, iyh
-	call	__lcmpu
-	jr	z, BB14_21
-	ld	d, 0
-BB14_21:
-	ld	a, iyl
-	rrc	a
-	sbc	a, a
-	ld	l, a
-	rrc	d
-	sbc	a, a
 	ld	e, a
-	ld	a, l
-	and	a, e
-	ld	d, a
-	ld	hl, (ix - 40)
-	ld	e, (ix - 41)
-	ld	bc, 31
-	ld	a, iyh
+	ld	bc, (ix - 124)
+	ld	(ix - 3), bc
+	push	ix
+	ld	bc, -134
+	add	ix, bc
+	ld	a, (ix)
+	pop	ix
+	ld	bc, (ix - 3)
 	call	__lcmpu
-	jr	z, BB14_25
-	ld	hl, (ix - 16)
-	ld	c, 0
-	jr	BB14_26
-BB14_23:
-	ld	hl, _.str.3
-	jp	BB14_11
-BB14_24:
-	ld	hl, _.str.4
-	jp	BB14_11
-BB14_25:
-	ld	c, -1
-	ld	hl, (ix - 16)
-BB14_26:
-	ld	a, d
-	and	a, c
-BB14_27:
-	ld	(ix - 54), a
+	ld	bc, 3
+	lea	hl, iy
+	jp	nc, BB17_25
+BB17_17:
+	ld	de, -146
+	lea	iy, ix
+	add	iy, de
+	ld	(iy), hl
+	ld	de, -143
+	lea	hl, ix
+	add	hl, de
+	ld	(hl), bc
+	ld	de, (ix - 100)
 	ld	c, 3
-	ld	de, (ix - 23)
 	ld	l, e
 	ld	h, d
 	call	__sshru
-	ld	(ix - 53), hl
+	ld	(ix - 3), de
+	push	ix
+	ld	de, -152
+	add	ix, de
+	ld	(ix), hl
+	pop	ix
 	ld	iy, 0
 	lea	bc, iy
+	ld	de, (ix - 3)
 	ld	c, e
 	ld	b, d
 	push	de
 	pop	iy
 	xor	a, a
-	ld	hl, (ix - 13)
-	ld	e, (ix - 19)
+	ld	hl, (ix - 110)
+	ld	e, (ix - 107)
+	ld	(ix - 124), hl
+	ld	(ix - 3), bc
+	push	ix
+	ld	bc, -134
+	add	ix, bc
+	ld	(ix), e
+	pop	ix
+	ld	bc, (ix - 3)
 	call	__lmulu
 	ld	bc, 31
 	call	__ladd
@@ -2109,7 +2399,16 @@ BB14_27:
 	call	__ldivs
 	ld	c, 2
 	call	__ishl
-	ld	(ix - 29), hl
+	push	ix
+	ld	de, -140
+	add	ix, de
+	ld	(ix), hl
+	pop	ix
+	push	ix
+	ld	de, -149
+	add	ix, de
+	ld	(ix), iy
+	pop	ix
 	ex	de, hl
 	ld	e, iyl
 	ld	d, iyh
@@ -2123,138 +2422,617 @@ BB14_27:
 	pop	hl
 	or	a, a
 	sbc	hl, bc
-	jp	nc, BB14_31
-	ld	hl, JTI14_0
+	jp	nc, BB17_23
+	ld	hl, JTI17_0
 	add	hl, de
 	add	hl, de
 	add	hl, de
 	ld	hl, (hl)
 	jp	(hl)
-BB14_29:
-	ld	iy, 4
-	ld	hl, (ix - 13)
-	ld	e, (ix - 19)
-	ld	bc, 3
-	call	__ladd
-	lea	bc, iy
-	call	__ldivs
-	ld	c, 2
-	call	__ishl
-	push	hl
-	call	__Znaj
-	ld	(ix - 57), hl
-	pop	hl
-	ld	hl, (ix - 44)
-	ld	e, (ix - 47)
+BB17_19:
+	ld	bc, -146
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	ld	bc, -133
+	lea	iy, ix
+	add	iy, bc
+	ld	e, (iy)
 	call	__lcmpzero
-	jp	nz, BB14_33
-	ld	hl, 2
-	ld	bc, (ix - 23)
-	call	__ishl
-	push	hl
-	jr	BB14_36
-BB14_31:
-	ld	hl, _.str.5
-	jp	BB14_11
-BB14_32:
-	ld	hl, (ix - 29)
+	jp	nz, BB17_23
+	ld	bc, -140
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
 	push	hl
 	call	__Znaj
-	ld	(ix - 57), hl
-	jr	BB14_37
-BB14_33:
+	ld	bc, -155
+	lea	iy, ix
+	add	iy, bc
+	ld	(iy), hl
+	pop	hl
+	ld	hl, (ix - 82)
+	ld	e, (ix - 79)
+	call	__lcmpzero
+	jp	nz, BB17_46
+	ld	hl, 1
+	ld	de, -149
+	lea	iy, ix
+	add	iy, de
+	ld	bc, (iy)
+	call	__ishl
+	push	ix
+	ld	de, -133
+	add	ix, de
+	ld	(ix), hl
+	pop	ix
+	ld	hl, 2
+	call	__ishl
+	push	hl
+	call	__Znaj
+	pop	de
+	ld	bc, -146
+	lea	iy, ix
+	add	iy, bc
+	ld	(iy), hl
+	push	ix
+	ld	bc, -143
+	add	ix, bc
+	ld	(ix), hl
+	pop	ix
+	ld	bc, -137
+	lea	hl, ix
+	add	hl, bc
+	ld	de, (hl)
+BB17_22:
+	ld	bc, -137
+	lea	hl, ix
+	add	hl, bc
+	ld	(hl), de
+	push	de
+	call	_rgb888to565
+	ld	de, -137
+	lea	iy, ix
+	add	iy, de
+	ld	bc, (iy)
+	pop	de
+	ld	(ix - 3), bc
+	push	ix
+	ld	bc, -143
+	add	ix, bc
+	ld	de, (ix)
+	pop	ix
+	push	de
+	pop	iy
+	ld	(iy), l
+	ld	(iy + 1), h
+	ld	bc, (ix - 3)
+	push	bc
+	pop	iy
+	lea	iy, iy + 4
+	lea	bc, iy
+	ld	(ix - 3), bc
+	ld	bc, -133
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	dec	hl
+	push	de
+	pop	iy
+	lea	iy, iy + 2
+	push	ix
+	ld	de, -143
+	add	ix, de
+	ld	(ix), iy
+	pop	ix
+	ld	bc, (ix - 3)
+	push	bc
+	pop	de
+	ld	bc, -133
+	lea	iy, ix
+	add	iy, bc
+	ld	(iy), hl
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jr	nz, BB17_22
+	jp	BB17_51
+BB17_23:
+	ld	hl, _.str.5
+	jp	BB17_11
+BB17_24:
+	ld	hl, _.str.3
+	jp	BB17_11
+BB17_25:
+	ld	hl, _.str.4
+	jp	BB17_11
+BB17_26:
+	ld	bc, -140
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	push	hl
+	call	__Znaj
+	ld	bc, -155
+	lea	iy, ix
+	add	iy, bc
+	ld	(iy), hl
+	pop	hl
+	ld	bc, -146
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	push	ix
+	ld	bc, -133
+	add	ix, bc
+	ld	e, (ix)
+	pop	ix
+	call	__lcmpzero
+	jp	z, BB17_32
+	ld	bc, 31744
+	ld	iy, (ix - 74)
+	ld	e, (ix - 71)
+	ld	hl, (ix - 70)
+	ld	(ix - 3), bc
+	push	ix
+	ld	bc, -133
+	add	ix, bc
+	ld	(ix), hl
+	pop	ix
+	ld	d, (ix - 67)
+	ld	hl, (ix - 66)
+	push	ix
+	ld	bc, -137
+	add	ix, bc
+	ld	(ix), hl
+	pop	ix
+	ld	a, (ix - 63)
+	ld	bc, -146
+	lea	hl, ix
+	add	hl, bc
+	ld	(hl), a
+	lea	hl, iy
+	push	ix
+	ld	bc, -158
+	add	ix, bc
+	ld	(ix), e
+	pop	ix
+	xor	a, a
+	ld	bc, (ix - 3)
+	call	__lcmpu
+	jp	nz, BB17_39
+	ld	bc, 992
+	ld	(ix - 3), bc
+	ld	bc, -133
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	ld	e, d
+	ld	bc, (ix - 3)
+	call	__lcmpu
+	jp	nz, BB17_39
+	ld	bc, -137
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	push	ix
+	ld	bc, -146
+	add	ix, bc
+	ld	e, (ix)
+	pop	ix
+	ld	bc, 31
+	call	__lcmpu
+	jp	nz, BB17_39
+	ld	iyh, a
+	jp	BB17_59
+BB17_31:
+	ld	hl, 4
+	ld	bc, -143
+	lea	iy, ix
+	add	iy, bc
+	ld	(iy), hl
+	ld	bc, -140
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	push	hl
+	call	__Znaj
+	ld	bc, -155
+	lea	iy, ix
+	add	iy, bc
+	ld	(iy), hl
+	pop	hl
+	ld	bc, -146
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	push	ix
+	ld	bc, -133
+	add	ix, bc
+	ld	e, (ix)
+	pop	ix
+	call	__lcmpzero
+	jp	nz, BB17_33
+BB17_32:
+	ld	iyh, 0
+	jp	BB17_59
+BB17_33:
+	ld	bc, -65536
+	ld	hl, (ix - 74)
+	ld	e, (ix - 71)
+	ld	iyh, b
+	ld	a, iyh
+	call	__lcmpu
+	ld	d, 1
+	ld	l, b
+	ld	iyl, d
+	jr	z, BB17_35
+	ex	de, hl
+	ld	iyl, e
+	ex	de, hl
+BB17_35:
+	ld	hl, (ix - 70)
+	ld	e, (ix - 67)
+	ld	bc, 65280
+	ld	a, iyh
+	call	__lcmpu
+	jr	z, BB17_37
+	ld	d, 0
+BB17_37:
+	ld	a, iyl
+	rrc	a
+	sbc	a, a
+	ld	l, a
+	rrc	d
+	sbc	a, a
+	ld	e, a
+	ld	a, l
+	and	a, e
+	ld	d, a
+	ld	hl, (ix - 66)
+	ld	e, (ix - 63)
+	ld	bc, 255
+	ld	a, iyh
+	call	__lcmpu
+	jp	z, BB17_53
+	ld	hl, 4
+	ld	e, h
+	jp	BB17_54
+BB17_39:
+	ld	bc, -143
+	lea	hl, ix
+	add	hl, bc
+	ld	(hl), d
+	push	ix
+	ld	bc, -137
+	add	ix, bc
+	ld	hl, (ix)
+	pop	ix
+	push	ix
+	ld	bc, -146
+	add	ix, bc
+	ld	e, (ix)
+	pop	ix
+	ld	bc, 31
+	call	__lcmpu
+	ld	d, 1
+	ld	a, d
+	jr	z, BB17_41
+	ld	a, 0
+BB17_41:
+	ld	bc, -137
+	lea	hl, ix
+	add	hl, bc
+	ld	(hl), a
+	lea	hl, iy
+	ld	bc, -158
+	lea	iy, ix
+	add	iy, bc
+	ld	e, (iy)
+	ld	bc, 63488
+	ld	iyh, c
+	ld	a, iyh
+	call	__lcmpu
+	ld	a, d
+	jr	z, BB17_43
+	ld	a, 0
+BB17_43:
+	ld	iyl, a
+	ld	bc, -133
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	push	ix
+	ld	bc, -143
+	add	ix, bc
+	ld	e, (ix)
+	pop	ix
+	ld	bc, 2016
+	ld	a, iyh
+	call	__lcmpu
+	jr	z, BB17_45
+	ld	d, 0
+BB17_45:
+	ld	a, iyl
+	rrc	a
+	sbc	a, a
+	ld	l, a
+	rrc	d
+	sbc	a, a
+	ld	e, a
+	ld	a, l
+	and	a, e
+	ld	l, a
+	push	ix
+	ld	bc, -137
+	add	ix, bc
+	ld	a, (ix)
+	pop	ix
+	rrc	a
+	sbc	a, a
+	ld	e, a
+	ld	a, l
+	and	a, e
+	bit	0, a
+	ld	hl, 2
+	jp	z, BB17_55
+	jp	BB17_56
+BB17_46:
 	push	hl
 	pop	de
 	push	hl
 	pop	iy
 	add	iy, de
+	push	ix
+	ld	bc, -133
+	add	ix, bc
+	ld	(ix), hl
+	pop	ix
 	add	hl, de
 	ld	de, -1
-	jr	c, BB14_35
+	jr	c, BB17_48
 	lea	de, iy
-BB14_35:
+BB17_48:
 	push	de
-BB14_36:
 	call	__Znaj
-BB14_37:
+	push	hl
+	pop	de
 	pop	hl
-	ld	bc, 320
-	ld	hl, (ix - 13)
-	ld	e, (ix - 19)
-	xor	a, a
-	call	__lcmps
-	call	pe, __setflag
-	jp	m, BB14_39
-	ld	d, 0
-	jr	BB14_40
-BB14_39:
-	ld	d, 1
-BB14_40:
-	ld	iy, -2730624
+	ld	(ix - 3), de
+	ld	de, -133
+	lea	hl, ix
+	add	hl, de
+	ld	bc, (hl)
 	push	bc
 	pop	hl
-	ld	e, a
-	ld	bc, (ix - 13)
-	ld	a, (ix - 19)
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	ld	de, (ix - 3)
+	ld	(ix - 3), bc
+	ld	bc, -146
+	lea	iy, ix
+	push	af
+	add	iy, bc
+	pop	af
+	ld	(iy), de
+	ld	bc, (ix - 3)
+	jp	z, BB17_51
+	ld	(ix - 3), bc
+	ld	bc, -143
+	lea	hl, ix
+	add	hl, bc
+	ld	(hl), de
+	ld	bc, -137
+	lea	iy, ix
+	add	iy, bc
+	ld	de, (iy)
+	ld	bc, (ix - 3)
+BB17_50:
+	ld	(ix - 3), de
+	ld	de, -133
+	lea	hl, ix
+	add	hl, de
+	ld	(hl), bc
+	ld	de, (ix - 3)
+	ld	bc, -137
+	lea	iy, ix
+	add	iy, bc
+	ld	(iy), de
+	push	de
+	call	_rgb888to565
+	ld	de, -133
+	lea	iy, ix
+	add	iy, de
+	ld	bc, (iy)
+	pop	de
+	ld	(ix - 3), bc
+	push	ix
+	ld	bc, -143
+	add	ix, bc
+	ld	de, (ix)
+	pop	ix
+	push	de
+	pop	iy
+	ld	(iy), l
+	ld	(iy + 1), h
+	ld	bc, -137
+	lea	hl, ix
+	add	hl, bc
+	ld	iy, (hl)
+	lea	iy, iy + 4
+	lea	hl, iy
+	ld	bc, (ix - 3)
+	dec	bc
+	push	de
+	pop	iy
+	lea	iy, iy + 2
+	push	ix
+	ld	de, -143
+	add	ix, de
+	ld	(ix), iy
+	pop	ix
+	ex	de, hl
+	push	bc
+	pop	hl
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jr	nz, BB17_50
+BB17_51:
+	ld.sis	de, 8
+	ld	bc, -149
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	or	a, a
+	sbc.sis	hl, de
+	ld	iyh, d
+	jp	z, BB17_57
+	ld	hl, 0
+	jp	BB17_58
+BB17_53:
+	ld	e, -1
+	ld	hl, 4
+BB17_54:
+	ld	a, d
+	and	a, e
+	bit	0, a
+	jr	nz, BB17_56
+BB17_55:
+	ld	hl, 5
+BB17_56:
+	push	ix
+	ld	bc, -143
+	add	ix, bc
+	ld	(ix), hl
+	pop	ix
+	jr	BB17_59
+BB17_57:
+	ld	hl, 1
+BB17_58:
+	push	ix
+	ld	bc, -143
+	add	ix, bc
+	ld	(ix), hl
+	pop	ix
+BB17_59:
+	ld	bc, 320
+	ld	hl, (ix - 124)
+	ld	(ix - 3), bc
+	push	ix
+	ld	bc, -134
+	add	ix, bc
+	ld	e, (ix)
+	pop	ix
+	ld	a, iyh
+	ld	bc, (ix - 3)
+	call	__lcmps
+	call	pe, __setflag
+	jp	m, BB17_61
+	ld	d, 0
+	jr	BB17_62
+BB17_61:
+	ld	d, 1
+BB17_62:
+	ld	hl, 320
+	ld	e, iyh
+	ld	bc, (ix - 124)
+	ld	(ix - 3), bc
+	ld	bc, -134
+	lea	iy, ix
+	add	iy, bc
+	ld	a, (iy)
+	ld	bc, (ix - 3)
 	call	__lsub
 	push	hl
 	pop	bc
 	ld	a, e
-	ld	l, 1
-	ld	e, l
+	ld	e, 1
+	ld	l, e
 	call	__lshru
 	bit	0, d
-	jr	nz, BB14_42
+	jr	nz, BB17_64
 	ld	bc, 0
-BB14_42:
+BB17_64:
 	push	bc
 	pop	hl
-	ld	a, e
-	ld	c, a
+	ld	c, e
 	call	__ishl
 	push	hl
-	pop	bc
-	add	iy, bc
-	ld	(ix - 19), iy
-	ld	de, (ix - 26)
+	pop	de
+	ld	hl, -2730624
+	add	hl, de
+	ld	de, -133
+	lea	iy, ix
+	add	iy, de
+	ld	(iy), hl
+	ld	de, (ix - 106)
+	ld	a, (ix - 103)
 	push	de
 	pop	hl
 	push	de
 	pop	iy
-	ld	(ix - 44), iy
 	add	iy, iy
 	sbc	hl, hl
 	push	hl
 	pop	bc
-	ld	hl, (ix - 44)
+	ld	(ix - 3), bc
+	ld	bc, -137
+	lea	iy, ix
+	add	iy, bc
+	ld	(iy), de
+	ex	de, hl
+	ld	bc, (ix - 3)
 	add	hl, bc
 	call	__ixor
-	push	hl
-	pop	iy
-	ld	hl, 240
+	ld	de, 240
+	ld	(ix - 3), bc
+	push	ix
+	ld	bc, -158
+	add	ix, bc
+	ld	(ix), hl
+	pop	ix
 	or	a, a
 	sbc	hl, de
-	ld	bc, -160
+	ld	bc, (ix - 3)
+	jr	nc, BB17_66
+	ld	hl, 240
+	ld	iyl, 0
+	ld	e, iyl
+	ld	(ix - 3), de
+	push	ix
+	ld	de, -137
+	add	ix, de
+	ld	bc, (ix)
+	pop	ix
+	ld	de, (ix - 3)
+	call	__lsub
+	ld	bc, 2
+	ld	a, iyl
+	call	__ldivs
+	ld	bc, -640
 	call	__imulu
 	push	hl
-	pop	bc
-	ld	de, 240
-	ld	(ix - 44), iy
-	lea	hl, iy
-	or	a, a
-	sbc	hl, de
-	jr	c, BB14_44
-	ld	bc, 0
-BB14_44:
-	push	bc
-	pop	hl
-	ld	c, a
-	call	__ishl
-	push	hl
 	pop	de
-	ld	iy, (ix - 19)
-	add	iy, de
-	xor	a, a
+	ld	(ix - 3), bc
+	push	ix
+	ld	bc, -133
+	add	ix, bc
+	ld	hl, (ix)
+	pop	ix
+	add	hl, de
+	push	ix
+	ld	de, -133
+	add	ix, de
+	ld	(ix), hl
+	pop	ix
+	ld	bc, (ix - 3)
+	jr	BB17_67
+BB17_66:
+	ld	iyl, 0
+BB17_67:
+	ld	a, iyl
 	ld	(-2883584), a
 	ld	hl, -2883584
 	push	hl
@@ -2262,79 +3040,170 @@ BB14_44:
 	inc	de
 	ld	bc, 153599
 	ldir
-	ld	hl, (ix - 26)
+	ld	bc, -137
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
 	add	hl, bc
 	or	a, a
 	sbc	hl, bc
-	jp	z, BB14_91
+	ld	bc, -133
+	lea	iy, ix
+	push	af
+	add	iy, bc
+	pop	af
+	ld	iy, (iy)
+	jp	z, BB17_104
 	ld	de, -2729984
 	lea	hl, iy
 	or	a, a
 	sbc	hl, de
-	jp	nc, BB14_91
-	ld	de, (ix - 13)
+	jp	nc, BB17_104
+	ld	a, 8
+	ld	de, (ix - 124)
 	dec	de
 	ld	bc, 319
 	push	de
 	pop	hl
 	or	a, a
 	sbc	hl, bc
-	jr	c, BB14_48
+	jr	c, BB17_71
 	ld	de, 319
-BB14_48:
-	ld	hl, (ix - 10)
-	ld	bc, (ix - 53)
-	ld	l, c
-	ld	h, b
-	ld	(ix - 10), hl
+BB17_71:
+	or	a, a
+	sbc	hl, hl
+	push	hl
+	pop	bc
+	ld	(ix - 3), de
+	ld	de, -152
+	lea	hl, ix
+	add	hl, de
+	ld	hl, (hl)
+	ld	c, l
+	ld	b, h
+	ld	de, -170
+	lea	hl, ix
+	add	hl, de
+	ld	(hl), bc
 	ld	c, 1
+	ld	hl, (ix - 124)
+	call	__ishl
+	push	ix
+	ld	de, -175
+	add	ix, de
+	ld	(ix), hl
+	pop	ix
+	push	ix
+	ld	de, -149
+	add	ix, de
+	ld	hl, (ix)
+	pop	ix
+	sub	a, l
+	push	ix
+	ld	de, -171
+	add	ix, de
+	ld	(ix), a
+	pop	ix
+	ld	b, 0
+	ld	c, l
+	scf
+	sbc	hl, hl
+	call	__ishl
+	ld	a, l
+	cpl
+	dec	de
+	lea	hl, ix
+	add	hl, de
+	ld	(hl), a
+	ld	de, (ix - 3)
 	ex	de, hl
+	ld	c, 1
 	call	__ishl
 	ld	de, 2
 	add	hl, de
-	ld	(ix - 63), hl
-	or	a, a
-	sbc	hl, hl
-	ld	(ix - 53), hl
-BB14_49:
-	ld	(ix - 19), iy
-	ld	hl, (ix - 57)
-	ld	(ix - 47), hl
-	ld	hl, (ix - 29)
-	ld	bc, (ix - 50)
-BB14_50:
-	ld	iy, (ix - 7)
-	add	iy, bc
-	ld	(ix - 26), hl
-	add	hl, bc
-	ld	(ix - 50), hl
-	ld	de, -8388608
+	push	ix
+	ld	de, -167
+	add	ix, de
+	ld	(ix), hl
+	pop	ix
+	ld	bc, 0
+BB17_72:
+	ld	de, -152
+	lea	hl, ix
 	add	hl, de
-	ld	de, -8383487
-	or	a, a
-	sbc	hl, de
-	jp	c, BB14_56
-	ld	hl, 5120
+	ld	(hl), bc
+	push	ix
+	ld	bc, -133
+	add	ix, bc
+	ld	(ix), iy
+	pop	ix
+	ld	bc, -155
+	lea	iy, ix
+	add	iy, bc
+	ld	hl, (iy)
+	push	ix
+	ld	bc, -137
+	add	ix, bc
+	ld	(ix), hl
+	pop	ix
+	ld	bc, -140
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	ld	de, (ix - 127)
+	ld	iy, (ix - 121)
+BB17_73:
+	add	iy, de
+	ld	(ix - 127), hl
+	add	hl, de
+	push	ix
+	ld	bc, -161
+	add	ix, bc
+	ld	(ix), hl
+	pop	ix
+	ld	bc, -8388608
+	add	hl, bc
+	ld	bc, -8383487
 	or	a, a
 	sbc	hl, bc
-	ld	(ix - 50), hl
+	jp	c, BB17_79
+	ld	hl, 5120
+	or	a, a
+	sbc	hl, de
+	push	ix
+	ld	bc, -161
+	add	ix, bc
+	ld	(ix), hl
+	pop	ix
 	push	hl
 	push	iy
-	ld	hl, (ix - 47)
+	ld	bc, -137
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
 	push	hl
 	call	_memcpy
 	ld	hl, 9
 	add	hl, sp
 	ld	sp, hl
-	ld	de, (ix - 50)
-	ld	hl, (ix - 47)
+	ld	bc, -161
+	lea	hl, ix
+	add	hl, bc
+	ld	de, (hl)
+	ld	bc, -137
+	lea	iy, ix
+	add	iy, bc
+	ld	hl, (iy)
 	add	hl, de
-	ld	(ix - 47), hl
-	ld	hl, (ix - 26)
+	push	ix
+	add	ix, bc
+	ld	(ix), hl
+	pop	ix
+	ld	hl, (ix - 127)
 	or	a, a
 	sbc	hl, de
-	ld	(ix - 26), hl
-	ld	hl, (ix - 3)
+	ld	(ix - 127), hl
+	ld	hl, (ix - 117)
 	push	hl
 	call	_fat_GetFileSize
 	pop	bc
@@ -2346,17 +3215,34 @@ BB14_50:
 	ld	a, e
 	ld	l, 9
 	call	__lshru
-	ld	(ix - 50), bc
-	ld	(ix - 60), a
-	ld	hl, (ix - 3)
+	ld	(ix - 3), de
+	ld	de, -161
+	lea	iy, ix
+	add	iy, de
+	ld	(iy), bc
+	push	ix
+	ld	de, -164
+	add	ix, de
+	ld	(ix), a
+	pop	ix
+	ld	hl, (ix - 117)
 	push	hl
+	ld	de, (ix - 3)
 	call	_fat_GetFileBlockOffset
 	push	hl
 	pop	bc
 	pop	hl
 	xor	a, a
-	ld	hl, (ix - 50)
-	ld	e, (ix - 60)
+	ld	de, -161
+	lea	hl, ix
+	add	hl, de
+	ld	hl, (hl)
+	ld	(ix - 3), bc
+	ld	bc, -164
+	lea	iy, ix
+	add	iy, bc
+	ld	e, (iy)
+	ld	bc, (ix - 3)
 	call	__lsub
 	push	hl
 	pop	iy
@@ -2373,517 +3259,649 @@ BB14_50:
 	inc	a
 	bit	0, a
 	ld	hl, 10
-	push	hl
-	pop	bc
-	jr	nz, BB14_53
-	lea	bc, iy
-BB14_53:
+	jr	nz, BB17_76
+	lea	hl, iy
+BB17_76:
 	bit	0, a
 	ld	a, 0
-	jr	nz, BB14_55
+	jr	nz, BB17_78
 	ld	a, d
-BB14_55:
-	ld	(ix - 50), a
-	ld	hl, (ix - 7)
+BB17_78:
+	ld	bc, -164
+	lea	iy, ix
+	add	iy, bc
+	ld	(iy), a
+	ld	de, (ix - 121)
+	push	de
 	push	hl
-	push	bc
-	ld	hl, (ix - 3)
+	push	ix
+	ld	bc, -161
+	add	ix, bc
+	ld	(ix), hl
+	pop	ix
+	ld	hl, (ix - 117)
 	push	hl
-	ld	(ix - 60), bc
 	call	_fat_ReadFile
+	ld	iy, (ix - 121)
 	push	hl
 	pop	bc
 	ld	hl, 9
 	add	hl, sp
 	ld	sp, hl
-	ld	hl, (ix - 60)
-	ld	e, (ix - 50)
+	ld	de, -161
+	lea	hl, ix
+	add	hl, de
+	ld	hl, (hl)
+	ld	(ix - 3), bc
+	push	ix
+	ld	bc, -164
+	add	ix, bc
+	ld	e, (ix)
+	pop	ix
 	xor	a, a
+	ld	bc, (ix - 3)
 	call	__lcmpu
 	ld	hl, 0
-	push	hl
-	pop	bc
-	ld	hl, (ix - 26)
-	jp	z, BB14_50
-	jp	BB14_93
-BB14_56:
-	ld	hl, (ix - 26)
+	ex	de, hl
+	ld	hl, (ix - 127)
+	jp	z, BB17_73
+	jp	BB17_106
+BB17_79:
+	ld	hl, (ix - 127)
 	push	hl
 	push	iy
-	ld	hl, (ix - 47)
+	ld	bc, -137
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
 	push	hl
 	call	_memcpy
 	ld	hl, 9
 	add	hl, sp
 	ld	sp, hl
-	ld	hl, (ix - 16)
-	ld	e, (ix - 20)
-	call	__lcmpzero
-	jr	nz, BB14_61
-	ld	de, (ix - 23)
-	ld	l, e
-	ld	h, d
-	ld.sis	bc, 16
-	or	a, a
-	sbc.sis	hl, bc
-	jr	nz, BB14_63
-	ld	hl, (ix - 13)
+	ld	bc, -143
+	lea	hl, ix
 	add	hl, bc
-	or	a, a
-	sbc	hl, bc
-	jp	z, BB14_89
-	or	a, a
-	sbc	hl, hl
-	ex	de, hl
-BB14_60:
-	ld	(ix - 26), de
-	ld	hl, (ix - 57)
-	add	hl, de
-	ld	iy, (ix - 19)
-	add	iy, de
-	ld	(ix - 47), iy
-	push	hl
-	call	_rgb888to565
-	pop	de
-	ld	iy, (ix - 47)
-	ld	(iy), l
-	ld	(iy + 1), h
-	ld	de, 2
-	ld	hl, (ix - 26)
-	add	hl, de
-	ex	de, hl
-	ld	hl, (ix - 63)
-	or	a, a
-	sbc	hl, de
-	jr	nz, BB14_60
-	jp	BB14_89
-BB14_61:
-	bit	0, (ix - 54)
-	jr	z, BB14_67
-	ld	de, (ix - 19)
-	ld	hl, (ix - 57)
-	ld	bc, 640
-	ldir
-	jp	BB14_89
-BB14_63:
-	ld	l, e
-	ld	h, d
-	ld.sis	bc, 24
-	or	a, a
-	sbc.sis	hl, bc
-	jp	nz, BB14_85
-	ld	hl, (ix - 13)
+	ld	hl, (hl)
+	ld	a, l
+	cp	a, 6
+	jr	c, BB17_82
+BB17_80:
+	ld	bc, -133
+	lea	hl, ix
 	add	hl, bc
-	or	a, a
-	sbc	hl, bc
-	jp	z, BB14_89
-	or	a, a
-	sbc	hl, hl
-	ex	de, hl
-	ld	bc, (ix - 57)
-BB14_66:
-	ld	(ix - 26), de
-	ld	hl, (ix - 19)
-	add	hl, de
-	ld	(ix - 47), hl
-	ld	(ix - 60), bc
-	push	bc
-	call	_rgb888to565
-	pop	de
-	ld	iy, (ix - 47)
-	ld	(iy), l
-	ld	(iy + 1), h
-	ld	iy, (ix - 60)
-	lea	iy, iy + 3
-	lea	bc, iy
-	ld	de, 2
-	ld	hl, (ix - 26)
-	add	hl, de
-	ex	de, hl
-	ld	hl, (ix - 63)
-	or	a, a
-	sbc	hl, de
-	jr	nz, BB14_66
-	jp	BB14_89
-BB14_67:
-	ld	hl, (ix - 32)
-	ld	e, (ix - 33)
-	call	__lcmpzero
-	ld	d, -5
-	jr	z, BB14_70
-	ld	d, -5
-	ld	iy, (ix - 32)
-	ld	e, (ix - 33)
-BB14_69:
-	lea	bc, iy
-	ld	a, e
-	ld	l, 1
-	call	__lshru
-	ld	(ix - 26), bc
-	ld	(ix - 47), a
-	inc	d
-	lea	hl, iy
-	ld	bc, 2
-	xor	a, a
-	call	__lcmpu
-	ld	iy, (ix - 26)
-	ld	e, (ix - 47)
-	jr	nc, BB14_69
-BB14_70:
-	ld	(ix - 26), d
-	ld	hl, (ix - 36)
-	ld	e, (ix - 37)
-	call	__lcmpzero
-	ld	d, -6
-	jr	z, BB14_73
-	ld	d, -6
-	ld	iy, (ix - 36)
-	ld	e, (ix - 37)
-BB14_72:
-	lea	bc, iy
-	ld	a, e
-	ld	l, 1
-	call	__lshru
-	ld	(ix - 47), bc
-	ld	(ix - 60), a
-	inc	d
-	lea	hl, iy
-	ld	bc, 2
-	xor	a, a
-	call	__lcmpu
-	ld	iy, (ix - 47)
-	ld	e, (ix - 60)
-	jr	nc, BB14_72
-BB14_73:
-	ld	(ix - 47), d
-	ld	hl, (ix - 40)
-	ld	e, (ix - 41)
-	call	__lcmpzero
-	ld	d, -5
-	jr	z, BB14_76
-	ld	d, -5
-	ld	iy, (ix - 40)
-	ld	e, (ix - 41)
-BB14_75:
-	lea	bc, iy
-	ld	a, e
-	ld	l, 1
-	call	__lshru
-	ld	(ix - 60), bc
-	ld	(ix - 66), a
-	inc	d
-	lea	hl, iy
-	ld	bc, 2
-	xor	a, a
-	call	__lcmpu
-	ld	iy, (ix - 60)
-	ld	e, (ix - 66)
-	jr	nc, BB14_75
-BB14_76:
-	ld	(ix - 67), d
-	ld	hl, (ix - 13)
-	add	hl, bc
-	or	a, a
-	sbc	hl, bc
-	jp	z, BB14_89
-	ld	e, (ix - 26)
-	ld	a, e
-	rlc	a
-	sbc	hl, hl
-	ld	l, e
-	ld	de, 11
-	add	hl, de
-	ld	(ix - 92), hl
-	ld	e, (ix - 47)
-	ld	a, e
-	rlc	a
-	sbc	hl, hl
-	ld	l, e
-	ld	de, 5
-	add	hl, de
-	ld	(ix - 95), hl
-	or	a, a
-	sbc	hl, hl
-	ld	(ix - 60), hl
-	ld	hl, (ix - 13)
-	ld	de, (ix - 57)
-	ld	(ix - 66), de
-BB14_78:
-	ld	(ix - 79), hl
-	ld	c, (ix - 67)
-	ld	a, c
-	rlc	a
-	sbc	hl, hl
-	push	hl
-	pop	de
-	ld	e, c
-	push	de
-	pop	hl
-	push	de
-	pop	iy
-	add	iy, iy
-	sbc	hl, hl
-	push	hl
-	pop	iy
-	ld	bc, -1
-	xor	a, a
-	ex	de, hl
-	ld	e, iyl
-	call	__land
-	ld	(ix - 82), hl
-	ld	e, (ix - 47)
-	ld	l, e
-	rlc	l
-	sbc	hl, hl
-	push	hl
-	pop	bc
-	ld	c, e
-	push	bc
-	pop	hl
-	push	bc
-	pop	iy
-	add	iy, iy
-	sbc	hl, hl
-	push	hl
-	pop	de
-	push	bc
-	pop	hl
-	ld	bc, -1
-	call	__land
-	ld	(ix - 88), hl
-	ld	e, (ix - 26)
-	ld	l, e
-	rlc	l
-	sbc	hl, hl
-	push	hl
-	pop	bc
-	ld	c, e
-	push	bc
-	pop	hl
-	push	bc
-	pop	iy
-	add	iy, iy
-	sbc	hl, hl
-	push	hl
-	pop	de
-	push	bc
-	pop	hl
-	ld	bc, -1
-	call	__land
-	ld	(ix - 76), hl
-	ld	de, (ix - 60)
-	ld	hl, (ix - 19)
-	add	hl, de
-	ld	(ix - 85), hl
-	ld	iy, (ix - 66)
-	ld	hl, (iy)
-	ld	d, (iy + 3)
-	ld	(ix - 70), hl
-	ld	e, d
-	ld	bc, (ix - 32)
-	ld	a, (ix - 33)
-	call	__land
-	push	hl
-	pop	iy
-	ld	hl, (ix - 92)
-	lea	bc, iy
-	ld	a, e
-	call	__lshl
-	ld	(ix - 73), bc
-	lea	bc, iy
-	ld	a, e
-	ld	hl, (ix - 76)
-	call	__lshru
-	ld	l, c
-	ld	h, b
-	ld	c, 11
-	call	__sshl
-	ld	a, (ix - 26)
-	add	a, -128
-	cp	a, -127
-	jp	c, BB14_80
-	ld	(ix - 73), hl
-BB14_80:
-	ld	hl, (ix - 70)
-	ld	(ix - 89), d
-	ld	e, d
-	ld	bc, (ix - 36)
-	ld	a, (ix - 37)
-	call	__land
-	push	hl
-	pop	iy
-	ld	hl, (ix - 95)
-	lea	bc, iy
-	ld	a, e
-	call	__lshl
-	ld	(ix - 76), bc
-	lea	bc, iy
-	ld	a, e
-	ld	hl, (ix - 88)
-	call	__lshru
-	ld	l, c
-	ld	h, b
-	ld	c, 5
-	call	__sshl
-	ld	a, (ix - 47)
-	add	a, -128
-	cp	a, -127
-	ld	d, (ix - 67)
-	jp	c, BB14_82
-	ld	(ix - 76), hl
-BB14_82:
-	ld	hl, (ix - 70)
-	ld	e, (ix - 89)
-	ld	bc, (ix - 40)
-	ld	a, (ix - 41)
-	call	__land
-	push	hl
-	pop	iy
-	lea	bc, iy
-	ld	a, e
-	ld	hl, (ix - 82)
-	call	__lshru
-	ld	(ix - 70), bc
-	lea	bc, iy
-	ld	a, e
-	call	__lshl
-	ld	a, d
-	add	a, -128
-	cp	a, -127
-	jr	c, BB14_84
-	ld	bc, (ix - 70)
-BB14_84:
-	ld	iy, (ix - 73)
-	add.sis	iy, bc
-	ld	de, (ix - 76)
-	add.sis	iy, de
-	ld	hl, (ix - 85)
-	push	de
-	lea	de, iy
-	ld	(hl), e
-	inc	hl
-	ld	(hl), d
-	pop	de
-	ld	de, (ix - 10)
-	ld	hl, (ix - 66)
-	add	hl, de
-	ld	(ix - 66), hl
-	ld	hl, (ix - 79)
-	dec	hl
-	ld	de, 2
-	ld	iy, (ix - 60)
-	add	iy, de
-	ld	(ix - 60), iy
-	add	hl, bc
-	or	a, a
-	sbc	hl, bc
-	jp	nz, BB14_78
-	jr	BB14_89
-BB14_85:
-	ld	l, e
-	ld	h, d
-	ld.sis	de, 32
-	or	a, a
-	sbc.sis	hl, de
-	jr	nz, BB14_89
-	ld	hl, (ix - 13)
-	add	hl, bc
-	or	a, a
-	sbc	hl, bc
-	jr	z, BB14_89
-	or	a, a
-	sbc	hl, hl
-	ex	de, hl
-	ld	bc, (ix - 57)
-BB14_88:
-	ld	(ix - 26), de
-	ld	hl, (ix - 19)
-	add	hl, de
-	ld	(ix - 47), hl
-	ld	(ix - 60), bc
-	push	bc
-	call	_rgb888to565
-	pop	de
-	ld	iy, (ix - 47)
-	ld	(iy), l
-	ld	(iy + 1), h
-	ld	iy, (ix - 60)
-	lea	iy, iy + 4
-	lea	bc, iy
-	ld	de, 2
-	ld	hl, (ix - 26)
-	add	hl, de
-	ex	de, hl
-	ld	hl, (ix - 63)
-	or	a, a
-	sbc	hl, de
-	jr	nz, BB14_88
-BB14_89:
+	ld	iy, (hl)
 	ld	de, -640
-	ld	iy, (ix - 19)
 	add	iy, de
-	ld	hl, (ix - 53)
-	inc	hl
-	ld	(ix - 53), hl
-	ld	de, (ix - 44)
+	push	ix
+	ld	de, -152
+	add	ix, de
+	ld	bc, (ix)
+	pop	ix
+	inc	bc
+	push	bc
+	pop	hl
+	ld	(ix - 3), bc
+	push	ix
+	ld	bc, -158
+	add	ix, bc
+	ld	de, (ix)
+	pop	ix
 	or	a, a
 	sbc	hl, de
-	jr	nc, BB14_91
+	ld	bc, (ix - 3)
+	jp	nc, BB17_104
 	lea	hl, iy
 	ld	de, -2729984
 	or	a, a
 	sbc	hl, de
-	jp	c, BB14_49
-BB14_91:
-	ld	a, 1
-	ld	(ix - 4), a
-BB14_92:
-	ld	hl, (ix - 57)
+	ld	de, -161
+	lea	hl, ix
+	push	af
+	add	hl, de
+	pop	af
+	ld	hl, (hl)
+	ld	(ix - 127), hl
+	jp	c, BB17_72
+	jp	BB17_104
+BB17_82:
+	ld	hl, JTI17_1
+	ld	bc, -143
+	lea	iy, ix
+	add	iy, bc
+	ld	de, (iy)
+	add	hl, de
+	add	hl, de
+	add	hl, de
+	ld	hl, (hl)
+	jp	(hl)
+BB17_83:
+	ld	hl, (ix - 124)
+	push	hl
+	call	__Znaj
+	push	hl
+	pop	iy
+	pop	hl
+	ld	de, (ix - 124)
+	push	de
+	pop	hl
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	push	ix
+	ld	bc, -137
+	push	af
+	add	ix, bc
+	pop	af
+	ld	(ix), iy
+	pop	ix
+	ld	(ix - 3), de
+	push	ix
+	ld	de, -171
+	push	af
+	add	ix, de
+	pop	af
+	ld	c, (ix)
+	pop	ix
+	push	ix
+	ld	de, -155
+	push	af
+	add	ix, de
+	pop	af
+	ld	hl, (ix)
+	pop	ix
+	ld	(ix - 127), hl
+	ld	de, (ix - 3)
+	jp	z, BB17_89
+BB17_84:
+	ld	(ix - 3), de
+	ld	de, -164
+	lea	hl, ix
+	add	hl, de
+	ld	(hl), iy
+	or	a, a
+	sbc	hl, hl
+	ld	iy, (ix - 127)
+	ld	l, (iy)
+	lea	iy, ix
+	add	iy, de
+	ld	iy, (iy)
+	call	__ishru
+	ld	a, l
+	ld	de, -172
+	lea	hl, ix
+	add	hl, de
+	and	a, (hl)
+	ld	(iy), a
+	ld	a, c
+	push	ix
+	ld	de, -149
+	add	ix, de
+	ld	hl, (ix)
+	pop	ix
+	cp	a, l
+	sbc	a, a
+	ld	b, a
+	push	ix
+	ld	de, -178
+	add	ix, de
+	ld	(ix), b
+	pop	ix
+	ld	a, c
+	sub	a, l
+	dec	de
+	lea	hl, ix
+	add	hl, de
+	ld	(hl), a
+	ld	a, b
+	and	a, 1
+	ld	bc, 0
+	ld	c, a
+	ld	hl, (ix - 127)
+	add	hl, bc
+	ld	de, (ix - 3)
+	ld	(ix - 127), hl
+	ld	bc, -178
+	lea	hl, ix
+	add	hl, bc
+	bit	0, (hl)
+	ld	(ix - 3), de
+	push	ix
+	ld	de, -171
+	push	af
+	add	ix, de
+	pop	af
+	ld	c, (ix)
+	pop	ix
+	ld	de, (ix - 3)
+	jr	nz, BB17_86
+	ld	(ix - 3), de
+	ld	de, -179
+	lea	hl, ix
+	add	hl, de
+	ld	c, (hl)
+	ld	de, (ix - 3)
+BB17_86:
+	dec	de
+	inc	iy
+	push	de
+	pop	hl
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jp	nz, BB17_84
+	ld	de, -137
+	lea	hl, ix
+	add	hl, de
+	ld	bc, (hl)
+	ld	iy, 0
+	lea	de, iy
+BB17_88:
+	ld	(ix - 3), bc
+	ld	bc, -164
+	lea	hl, ix
+	add	hl, bc
+	ld	(hl), de
+	ld	bc, (ix - 3)
+	ld	(ix - 127), bc
+	ld	bc, -133
+	lea	iy, ix
+	add	iy, bc
+	ld	hl, (iy)
+	add	hl, de
+	push	ix
+	ld	de, -178
+	add	ix, de
+	ld	(ix), hl
+	pop	ix
+	or	a, a
+	sbc	hl, hl
+	ld	iy, (ix - 127)
+	ld	l, (iy)
+	ld	c, 1
+	call	__ishl
+	push	hl
+	pop	de
+	ld	(ix - 3), bc
+	ld	bc, -146
+	lea	iy, ix
+	add	iy, bc
+	ld	hl, (iy)
+	add	hl, de
+	ld	hl, (hl)
+	push	ix
+	ld	bc, -178
+	add	ix, bc
+	ld	iy, (ix)
+	pop	ix
+	ld	(iy), l
+	ld	(iy + 1), h
+	ld	de, 2
+	ld	bc, -164
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	add	hl, de
+	ex	de, hl
+	ld	bc, (ix - 3)
+	ld	bc, (ix - 127)
+	inc	bc
+	ld	(ix - 3), bc
+	ld	bc, -167
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	or	a, a
+	sbc	hl, de
+	ld	bc, (ix - 3)
+	jp	nz, BB17_88
+BB17_89:
+	ld	bc, -137
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
 	push	hl
 	call	__ZdaPv
-	jp	BB14_12
-BB14_93:
+	pop	hl
+	jp	BB17_80
+BB17_90:
+	ld	hl, 320
+	ld	e, 0
+	ld	bc, (ix - 124)
+	ld	(ix - 3), bc
+	ld	bc, -134
+	lea	iy, ix
+	add	iy, bc
+	ld	a, (iy)
+	ld	bc, (ix - 3)
+	call	__lcmps
+	call	pe, __setflag
+	jp	p, BB17_102
+	ld	bc, -133
+	lea	hl, ix
+	add	hl, bc
+	ld	de, (hl)
+	ld	bc, -155
+	lea	iy, ix
+	add	iy, bc
+	ld	hl, (iy)
+	ld	bc, 640
+	ldir
+	jp	BB17_80
+BB17_92:
+	ld	hl, (ix - 124)
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jp	z, BB17_80
+	or	a, a
+	sbc	hl, hl
+	ex	de, hl
+BB17_94:
+	ld	(ix - 127), de
+	ld	bc, -155
+	lea	hl, ix
+	add	hl, bc
+	ld	iy, (hl)
+	add	iy, de
+	push	ix
+	ld	bc, -133
+	add	ix, bc
+	ld	hl, (ix)
+	pop	ix
+	add	hl, de
+	push	ix
+	ld	bc, -137
+	add	ix, bc
+	ld	(ix), hl
+	pop	ix
+	push	iy
+	call	_rgb1555to565
+	pop	de
+	ld	bc, -137
+	lea	iy, ix
+	add	iy, bc
+	ld	iy, (iy)
+	ld	(iy), l
+	ld	(iy + 1), h
+	ld	de, 2
+	ld	hl, (ix - 127)
+	add	hl, de
+	ex	de, hl
+	ld	bc, -167
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	or	a, a
+	sbc	hl, de
+	jr	nz, BB17_94
+	jp	BB17_80
+BB17_95:
+	ld	hl, (ix - 124)
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jp	z, BB17_80
+	or	a, a
+	sbc	hl, hl
+	ex	de, hl
+	ld	bc, -155
+	lea	hl, ix
+	add	hl, bc
+	ld	iy, (hl)
+BB17_97:
+	ld	bc, -164
+	lea	hl, ix
+	add	hl, bc
+	ld	(hl), de
+	ld	(ix - 127), iy
+	push	ix
+	ld	bc, -133
+	add	ix, bc
+	ld	hl, (ix)
+	pop	ix
+	add	hl, de
+	push	ix
+	ld	bc, -137
+	add	ix, bc
+	ld	(ix), hl
+	pop	ix
+	push	iy
+	call	_rgb888to565
+	ld	bc, (ix - 127)
+	pop	de
+	ld	de, -137
+	lea	iy, ix
+	add	iy, de
+	ld	iy, (iy)
+	ld	(iy), l
+	ld	(iy + 1), h
+	ld	(ix - 3), bc
+	ld	bc, -170
+	lea	hl, ix
+	add	hl, bc
+	ld	de, (hl)
+	ld	bc, (ix - 3)
+	push	bc
+	pop	iy
+	add	iy, de
+	ld	de, 2
+	push	ix
+	ld	bc, -164
+	add	ix, bc
+	ld	hl, (ix)
+	pop	ix
+	add	hl, de
+	ex	de, hl
+	ld	bc, -167
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	or	a, a
+	sbc	hl, de
+	jr	nz, BB17_97
+	jp	BB17_80
+BB17_98:
+	ld	hl, (ix - 124)
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	jp	z, BB17_80
+	ld	de, -155
+	lea	hl, ix
+	add	hl, de
+	ld	bc, (hl)
+	ld	iy, 0
+	lea	de, iy
+BB17_100:
+	ld	(ix - 3), bc
+	ld	bc, -137
+	lea	hl, ix
+	add	hl, bc
+	ld	(hl), de
+	ld	bc, (ix - 3)
+	ld	(ix - 127), bc
+	ld	bc, -133
+	lea	iy, ix
+	add	iy, bc
+	ld	hl, (iy)
+	add	hl, de
+	push	ix
+	ld	de, -164
+	add	ix, de
+	ld	(ix), hl
+	pop	ix
+	or	a, a
+	sbc	hl, hl
+	ld	iy, (ix - 127)
+	ld	l, (iy)
+	ld	c, 1
+	call	__ishl
+	push	hl
+	pop	de
+	ld	(ix - 3), bc
+	ld	bc, -146
+	lea	iy, ix
+	add	iy, bc
+	ld	hl, (iy)
+	add	hl, de
+	ld	hl, (hl)
+	push	ix
+	ld	bc, -164
+	add	ix, bc
+	ld	iy, (ix)
+	pop	ix
+	ld	(iy), l
+	ld	(iy + 1), h
+	ld	de, 2
+	ld	bc, -137
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	add	hl, de
+	ex	de, hl
+	ld	bc, (ix - 3)
+	ld	bc, (ix - 127)
+	inc	bc
+	ld	(ix - 3), bc
+	ld	bc, -167
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	or	a, a
+	sbc	hl, de
+	ld	bc, (ix - 3)
+	jp	nz, BB17_100
+	jp	BB17_80
+BB17_101:
+	ld	bc, -130
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	push	hl
+	ld	bc, -133
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	push	hl
+	ld	bc, -170
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	push	hl
+	ld	hl, (ix - 124)
+	push	hl
+	ld	bc, -155
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	push	hl
+	call	__Z18displayBitFieldRowPhijPtP16bitmapInfoHeader
+	ld	hl, 15
+	jr	BB17_103
+BB17_102:
+	ld	bc, -175
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	push	hl
+	ld	bc, -155
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	push	hl
+	ld	bc, -133
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	push	hl
+	call	_memcpy
+	ld	hl, 9
+BB17_103:
+	add	hl, sp
+	ld	sp, hl
+	jp	BB17_80
+BB17_104:
+	ld	bc, -146
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	push	hl
+	call	nz, __ZdaPv
+	pop	hl
+	ld	a, 1
+	ld	(ix - 118), a
+BB17_105:
+	ld	bc, -155
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	push	hl
+	call	__ZdaPv
+	jp	BB17_12
+BB17_106:
 	ld	hl, _.str.1
 	push	hl
 	call	_os_PutStrFull
 	pop	hl
-	jr	BB14_92
+	ld	bc, -146
+	lea	hl, ix
+	add	hl, bc
+	ld	hl, (hl)
+	add	hl, bc
+	or	a, a
+	sbc	hl, bc
+	push	hl
+	call	nz, __ZdaPv
+	pop	hl
+	jr	BB17_105
 	section	.text,"ax",@progbits
 	section	.rodata,"a",@progbits
-	private	JTI14_0
-JTI14_0:
-	dl	BB14_29
-	dl	BB14_29
-	dl	BB14_31
-	dl	BB14_29
-	dl	BB14_31
-	dl	BB14_31
-	dl	BB14_31
-	dl	BB14_29
-	dl	BB14_31
-	dl	BB14_31
-	dl	BB14_31
-	dl	BB14_31
-	dl	BB14_31
-	dl	BB14_31
-	dl	BB14_31
-	dl	BB14_32
-	dl	BB14_31
-	dl	BB14_31
-	dl	BB14_31
-	dl	BB14_31
-	dl	BB14_31
-	dl	BB14_31
-	dl	BB14_31
-	dl	BB14_32
-	dl	BB14_31
-	dl	BB14_31
-	dl	BB14_31
-	dl	BB14_31
-	dl	BB14_31
-	dl	BB14_31
-	dl	BB14_31
-	dl	BB14_32
+	private	JTI17_0
+JTI17_0:
+	dl	BB17_19
+	dl	BB17_19
+	dl	BB17_23
+	dl	BB17_19
+	dl	BB17_23
+	dl	BB17_23
+	dl	BB17_23
+	dl	BB17_19
+	dl	BB17_23
+	dl	BB17_23
+	dl	BB17_23
+	dl	BB17_23
+	dl	BB17_23
+	dl	BB17_23
+	dl	BB17_23
+	dl	BB17_26
+	dl	BB17_23
+	dl	BB17_23
+	dl	BB17_23
+	dl	BB17_23
+	dl	BB17_23
+	dl	BB17_23
+	dl	BB17_23
+	dl	BB17_31
+	dl	BB17_23
+	dl	BB17_23
+	dl	BB17_23
+	dl	BB17_23
+	dl	BB17_23
+	dl	BB17_23
+	dl	BB17_23
+	dl	BB17_31
+	private	JTI17_1
+JTI17_1:
+	dl	BB17_83
+	dl	BB17_98
+	dl	BB17_90
+	dl	BB17_92
+	dl	BB17_95
+	dl	BB17_101
 
 	section	.text,"ax",@progbits
 	public	_main
@@ -2898,7 +3916,7 @@ _main:
 	pop	hl
 	call	_init_USB
 	bit	0, a
-	jr	z, BB15_8
+	jr	z, BB18_8
 	ld	hl, _.str.2.8
 	ld	de, _.str.3.9
 	push	de
@@ -2908,41 +3926,41 @@ _main:
 	add	hl, sp
 	ld	sp, hl
 	bit	0, a
-	jr	z, BB15_11
+	jr	z, BB18_11
 	call	_usb_WaitForEvents
 	ld	a, (_global+1796)
 	bit	0, a
-	jr	nz, BB15_12
-BB15_3:
+	jr	nz, BB18_12
+BB18_3:
 	ld	a, (_global+1795)
 	bit	0, a
-	jr	z, BB15_5
-BB15_4:
+	jr	z, BB18_5
+BB18_4:
 	ld	hl, _global+3
 	push	hl
 	call	_msd_Close
 	pop	hl
-BB15_5:
+BB18_5:
 	call	_usb_Cleanup
-BB15_6:
+BB18_6:
 	call	_os_GetCSC
 	or	a, a
-	jr	z, BB15_6
+	jr	z, BB18_6
 	or	a, a
 	sbc	hl, hl
 	ret
-BB15_8:
+BB18_8:
 	ld	hl, _.str.1.7
 	push	hl
 	call	_os_PutStrFull
 	pop	hl
-BB15_9:
+BB18_9:
 	call	_os_GetCSC
 	or	a, a
-	jr	z, BB15_9
+	jr	z, BB18_9
 	ld	hl, 1
 	ret
-BB15_11:
+BB18_11:
 	ld	hl, _.str.4.10
 	push	hl
 	call	_os_PutStrFull
@@ -2950,16 +3968,16 @@ BB15_11:
 	call	_usb_WaitForEvents
 	ld	a, (_global+1796)
 	bit	0, a
-	jr	z, BB15_3
-BB15_12:
+	jr	z, BB18_3
+BB18_12:
 	ld	hl, _global+1027
 	push	hl
 	call	_fat_Close
 	pop	hl
 	ld	a, (_global+1795)
 	bit	0, a
-	jr	nz, BB15_4
-	jr	BB15_5
+	jr	nz, BB18_4
+	jr	BB18_5
 	section	.text,"ax",@progbits
 
 	section	.bss,"aw",@nobits
@@ -3033,6 +4051,7 @@ _.str.4.10:
 	extern	__ldivs
 	extern	__ZdaPv
 	extern	__Unwind_SjLj_Register
+	extern	_rgb1555to565
 	extern	_toupper
 	extern	_usb_WaitForInterrupt
 	extern	_fat_GetFileSize
@@ -3046,12 +4065,12 @@ _.str.4.10:
 	extern	_strncat
 	extern	_rgb888to565
 	extern	_os_DrawStatusBar
+	extern	_memcpy
 	extern	__ishl
 	extern	__ladd
 	extern	_msd_Open
-	extern	_strlen
 	extern	__sshru
-	extern	_memcpy
+	extern	_strlen
 	extern	__setflag
 	extern	_msd_FindPartitions
 	extern	__Znaj
@@ -3067,18 +4086,19 @@ _.str.4.10:
 	extern	__lshru
 	extern	_time
 	extern	_usb_Cleanup
-	extern	_msd_Close
 	extern	_os_HomeUp
+	extern	_msd_Close
 	extern	_fat_Create
 	extern	_fat_SetFileSize
 	extern	_fat_CloseFile
 	extern	__lsub
+	extern	__indcallhl
 	extern	__lmulu
 	extern	__ishru
 	extern	__Unwind_SjLj_Unregister
 	extern	__lshl
-	extern	__imulu
 	extern	__land
+	extern	__imulu
 	extern	_fat_OpenFile
 	extern	_calloc
 	extern	_msd_Info

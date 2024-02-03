@@ -39,6 +39,15 @@ enum biCompressionMode {
     BI_BITFIELDS = 3
 };
 
+enum bppModes {
+    indexed = 0,
+    indexed8 = 1,
+    native = 2,
+    rgb1555 = 3,
+    rgb888 = 4,
+    bitfields = 5
+};
+
 bool displayBitmap(const char* path, const char* name);
 
 extern "C" {
