@@ -1,0 +1,140 @@
+Section          Base   Top    High   Length
+---------------- ------ ------ ------ -------
+.icon            D1A882 D1A8B7            35h
+.init.libs       D1A8B7 D1A90F            58h
+.libs            D1A90F D1A982            73h
+.init.clock      D1A982 D1A982             0h
+.init.reruncheck D1A982 D1A982             0h
+.init            D1A982 D1A9AE            2Ch
+.fini            D1A9AE D1A9E2            34h
+.text            D1A9E2 D1BBC5          11E3h
+.data            D1BBC5 D1BBD4             Fh
+.rodata          D1BBD4 D1BD1B           147h
+.init_array      000000 000000             0h
+.ctors           000000 000000             0h
+.dtors           000000 000000             0h
+.fini_array      000000 000000             0h
+.bss             D052C6 D05AEF D13FD8    829h
+.header          D1A87F D1A882             3h
+
+Label                                  Value
+------------------------------------   ------
+___low_bss                           = D052C6
+___len_bss                           = 000829
+___heaptop                           = D13FD8
+___heapbot                           = D05AEF
+___libs                              = D1A90F
+___init_array_count                  = 000000
+___ctors_count                       = 000000
+___dtors_count                       = 000000
+___fini_array_count                  = 000000
+__stack                              = D1A87E
+__iand                               = D1A9E2
+__frameset                           = D1A9F9
+__frameset0                          = D1AA07
+__idivs                              = D1AA12
+__idivu                              = D1AA19
+__idvrms                             = D1AA21
+__idvrmu                             = D1AA4F
+__idvrmu.hijack_a_iters_ude_dividend = D1AA53
+__imulu                              = D1AA67
+__indcallhl                          = D1AA97
+__ineg                               = D1AA98
+__ishl                               = D1AAA1
+__ishru                              = D1AAC7
+__ladd                               = D1AB08
+__lcmpu                              = D1AB0E
+__lcmpzero                           = D1AB16
+__ldivs                              = D1AB21
+__ldivs_lrems_common                 = D1AB39
+__ldivu                              = D1AB4A
+__ldvrmu                             = D1AB54
+__lmulu                              = D1AB7C
+__lneg                               = D1ABD8
+__lshrs.hijack_lshru                 = D1ABF1
+__lshru                              = D1AC00
+__lsub                               = D1AC10
+__sdvrmu                             = D1AC1A
+__sremu                              = D1AC2A
+_os_DisableHomeTextBuffer            = D1AC31
+_os_EnableHomeTextBuffer             = D1AC43
+_boot_GetDate                        = 0005A8
+_boot_GetTime                        = 0005B0
+_os_ClrLCDFull                       = 020808
+_os_HomeUp                           = 020828
+_os_DrawStatusBar                    = 021A3C
+_os_PutStrFull                       = 021D2C
+_os_GetCSC                           = 021D3C
+_malloc                              = D1AC74
+_free                                = D1AD47
+_calloc                              = D1AC55
+__standard_malloc                    = D1AC74
+__standard_free                      = D1AD47
+__standard_realloc                   = D1ADF5
+__alloc_base                         = D052C6
+_heap_ptr                            = D1BBC5
+_gmtime                              = D1AE6B
+_gmtime.dpm                          = D1BBC8
+_gmtime.tm2                          = D052CC
+_localtime                           = D1B0ED
+_mktime                              = D1B110
+_mktime.yday                         = D1BBD4
+_time                                = D1B214
+_memset                              = D1B292
+_memcpy                              = 0000A4
+_strlen                              = 0000D4
+_strncat                             = 0000D8
+_strncpy                             = 0000E0
+_toupper                             = 021E38
+__Znwj                               = D1B2A9
+__ZdlPv                              = D1B2EA
+__Znaj                               = D1B2FA
+__ZdaPv                              = D1B30A
+__ZNSt12_GLOBAL__N_113__new_handlerE = D052E7
+.missingappvar                       = D1BBF8
+.libloadname                         = D1BBFD
+.libloadnamelen                      = 000007
+.webaddress                          = D1BC05
+__start                              = D1A982
+___exithl                            = D1A9AE
+skip._exit                           = D1A9AE
+skip.__Exit                          = D1A9AE
+skip._abort                          = D1A9AE
+_exit.sp                             = D1A9AF
+_exit.flash_wait_states              = D1A9B9
+_handleUsbEvent                      = D1B31A
+JTI1_0                               = D1BC1A
+_init_USB                            = D1B393
+_openFile                            = D1B4BF
+__Z13displayBitmapPKcS0_             = D1B909
+_main                                = D1BB37
+_global                              = D052EA
+_partitions                          = D059EF
+_.str.1                              = D1BC26
+_.str.1.2                            = D1BC36
+_.str.2                              = D1BC4F
+_.str.3                              = D1BC67
+_.str.4                              = D1BC81
+_.str.1.5                            = D1BCC4
+_.str.2.6                            = D1BCF4
+_.str.3.7                            = D1BCF6
+_.str.4.8                            = D1BCFF
+lib.LibLoad                          = D1A90F
+_#fat_Open                           = D1A924
+_#fat_Close                          = D1A928
+_#fat_OpenFile                       = D1A92C
+_#fat_CloseFile                      = D1A930
+_#fat_GetFileSize                    = D1A934
+_#fat_ReadFile                       = D1A938
+_#fat_Create                         = D1A93C
+_#msd_Open                           = D1A94B
+_#msd_Close                          = D1A94F
+_#msd_Info                           = D1A953
+_#msd_Read                           = D1A957
+_#msd_Write                          = D1A95B
+_#msd_FindPartitions                 = D1A95F
+_#usb_Init                           = D1A96E
+_#usb_Cleanup                        = D1A972
+_#usb_WaitForEvents                  = D1A976
+_#usb_WaitForInterrupt               = D1A97A
+_#usb_ResetDevice                    = D1A97E
