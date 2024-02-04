@@ -14,5 +14,6 @@ obj/src/bitmap.cpp.bc: src/bitmap.cpp \
   /home/loganius/Downloads/CEdev/include/usbdrvce.h \
   /home/loganius/Downloads/CEdev/include/stddef.h src/bitmap.hpp \
   /home/loganius/Downloads/CEdev/include/ti/screen.h \
-  /home/loganius/Downloads/CEdev/include/ti/ui.h src/usb.h \
+  /home/loganius/Downloads/CEdev/include/ti/ui.h \
+  /home/loganius/Downloads/CEdev/include/ti/getcsc.h src/usb.h \
   /home/loganius/Downloads/CEdev/include/msddrvce.h

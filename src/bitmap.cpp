@@ -5,6 +5,7 @@
 #include <fatdrvce.h>
 #include "bitmap.hpp"
 #include <ti/screen.h>
+#include <ti/getcsc.h>
 
 extern "C" {
     #include "usb.h"
@@ -15,7 +16,6 @@ extern "C" {
 
 /*
 Left to do:
-Handle indexed colors
 Handle images that are smaller/bigger than 320x240 (better than just cropping them)
 Implement scaling with linear interpolation
 Handle negative heights
@@ -35,40 +35,66 @@ int8_t findBitMaskShift(uint32_t bitmask) {
 
 // Implement scaling later
 // Draws a row using the conversion function provided
-void displayRGBRow(uint8_t* rowBuffer, int width, unsigned int bytesPerPixel, uint16_t* screenPointer, uint16_t(*pixelConvert)(uint8_t*)) {
-    for (unsigned int i = 0; i < width && i < 320; i++) {
-        *screenPointer = pixelConvert(rowBuffer);
-        rowBuffer += bytesPerPixel;
-        screenPointer++;
+void displayRGBRow(uint8_t* rowBuffer, int width, unsigned int renderWidth, unsigned int bytesPerPixel, uint16_t* screenPointer, uint16_t(*pixelConvert)(uint8_t*)) {
+    int xError = renderWidth;
+    unsigned int x = 0;
+    while (x < width) {
+        while (xError > 0) {
+            *screenPointer = pixelConvert(rowBuffer);
+            screenPointer++;
+            xError -= width;
+        }
+        while (xError <= 0) {
+            rowBuffer += bytesPerPixel;
+            xError += renderWidth;
+            x++;
+        }
     }
 }
 
 // Implement scaling later
 // Draws a row of indexed 8bpp color pixels using the provided palette
-void displayIndexed8Row(uint8_t* rowBuffer, int width, uint16_t* palette, uint16_t* screenPointer) {
-    for (unsigned int i = 0; i < width && i < 320; i++) {
-        *screenPointer = palette[rowBuffer[i]];
-        screenPointer++;
+void displayIndexed8Row(uint8_t* rowBuffer, int width, unsigned int renderWidth, uint16_t* palette, uint16_t* screenPointer) {
+    int xError = renderWidth;
+    unsigned int x = 0;
+    while (x < width) {
+        while (xError > 0) {
+            *screenPointer = palette[rowBuffer[x]];
+            screenPointer++;
+            xError -= width;
+        }
+        while (xError <= 0) {
+            xError += renderWidth;
+            x++;
+        }
     }
 }
 
 // Implement scaling later
-// Draws a row of indexed color pixels using the provided palette
-void displayIndexedRow(uint8_t* rowBuffer, int width, uint8_t bitsPerPixel, uint16_t* palette, uint16_t* screenPointer) {
-    uint8_t* indexed8RowBuffer = new uint8_t[width];
+// Draws a row of indexed color pixels in cases where the bit depth is less than 8
+void displayIndexedRow(uint8_t* rowBuffer, int width, unsigned int renderWidth, uint8_t bitsPerPixel, uint16_t* palette, uint16_t* screenPointer) {
     uint8_t bitMask = (1 << bitsPerPixel)-1;
     uint8_t pixelShift = 8 - bitsPerPixel;
-    for (unsigned int i = 0; i < width; i++) {
-        indexed8RowBuffer[i] = (((*rowBuffer) >> pixelShift) & bitMask);
-        if (pixelShift < bitsPerPixel) {
-            rowBuffer++;
-            pixelShift = 8 - bitsPerPixel;
-        } else {
-            pixelShift -= bitsPerPixel;
+    int xError = 0;
+    int x = 0;
+    while (x < width) {
+        uint8_t index = (((*rowBuffer) >> pixelShift) & bitMask);
+        while (xError > 0) {
+            *screenPointer = palette[index];
+            screenPointer++;
+            xError -= width;
+        }
+        while (xError <= 0) {
+            if (pixelShift < bitsPerPixel) {
+                rowBuffer++;
+                pixelShift = 8 - bitsPerPixel;
+            } else {
+                pixelShift -= bitsPerPixel;
+            }
+            xError += renderWidth;
+            x++;
         }
     }
-    displayIndexed8Row(indexed8RowBuffer, width, palette, screenPointer);
-    delete[] indexed8RowBuffer;
 }
 
 // Takes a bitmap color table and converts it to a BGR 565 palette
@@ -81,16 +107,18 @@ void generatePalette(unsigned int colors, uint8_t* colorTable, uint16_t* palette
 
 // Implement scaling later
 // Draws a row using the bitmasks in the BITMAPV4HEADER
-void displayBitFieldRow(uint8_t* trueRowBuffer, int width, unsigned int bytesPerPixel, uint16_t* screenPointer, bitmapInfoHeader* DIBheader) {
+void displayBitFieldRow(uint8_t* trueRowBuffer, int width, unsigned int renderWidth, unsigned int bytesPerPixel, uint16_t* screenPointer, bitmapInfoHeader* DIBheader) {
     // Could be determined ahead of time
     int8_t redMaskShift = findBitMaskShift(DIBheader->bV4RedMask);
     int8_t greenMaskShift = findBitMaskShift(DIBheader->bV4GreenMask) - 1;
     int8_t blueMaskShift = findBitMaskShift(DIBheader->bV4BlueMask);
     uint32_t* rowBuffer = (uint32_t*) trueRowBuffer;
-    uint16_t red;
-    uint16_t green;
-    uint16_t blue;
-    for (unsigned int i = 0; i < width; i++) {
+    int xError = 0;
+    unsigned int x = 0;
+    while (x < width) {
+        uint16_t red;
+        uint16_t green;
+        uint16_t blue;
         if (redMaskShift <= 0) {
             red = ((*rowBuffer) & DIBheader->bV4RedMask) << abs(redMaskShift + 11);
         } else {
@@ -106,10 +134,17 @@ void displayBitFieldRow(uint8_t* trueRowBuffer, int width, unsigned int bytesPer
         } else {
             blue = ((*rowBuffer) & DIBheader->bV4BlueMask) >> blueMaskShift;
         }
-        *screenPointer = red + green + blue;
-        trueRowBuffer += bytesPerPixel;
-        rowBuffer = (uint32_t*) trueRowBuffer;
-        screenPointer++;
+        while (xError > 0) {
+            *screenPointer = red + green + blue;
+            screenPointer++;
+            xError -= width;
+        }
+        while (xError <= 0) {
+            trueRowBuffer += bytesPerPixel;
+            rowBuffer = (uint32_t*) trueRowBuffer;
+            xError += renderWidth;
+            x++;
+        }
     }
 }
 
@@ -261,48 +296,59 @@ bool displayBitmap(const char* path, const char* name) {
     uint16_t* screenPointer = vram + (320*239);
 
     // If the image doesn't fill the whole screen, adjust its starting position in vram to center the image
-    if (DIBheader.biWidth < 320) {
-        screenPointer += (320 - DIBheader.biWidth)/2;
+    unsigned int renderWidth;
+    unsigned int renderHeight;
+    float xRatio = 320.0f/(float)DIBheader.biWidth;
+    float yRatio = 240.0f/(float)abs(DIBheader.biHeight);
+    if (xRatio < yRatio) {
+        renderWidth = 320;
+        renderHeight = ((float)abs(DIBheader.biHeight))*xRatio;
+        screenPointer -= ((240-renderHeight)/2)*320;
+    } else {
+        renderWidth = ((float)DIBheader.biWidth)*yRatio;
+        screenPointer += (320-renderWidth)/2;
+        renderHeight = 240;
     }
-    if (abs(DIBheader.biHeight) < 240) {
-        screenPointer -= ((240 - DIBheader.biHeight)/2)*320;
-    }
-
     // Clear out screen before writing the final image
     memset(vram, 0, (320*240)*sizeof(uint16_t));
 
+    int yError = 0;
+    unsigned int y = 0;
+
     // No where near to finished code -- Right now this assumes the image is bottom to top and already stored in 5-6-5 BGR
-    for (unsigned int i = 0; i < abs(DIBheader.biHeight) && screenPointer < vram + (320*240); i++) {
-        // A pointer to our current position on the row buffer
-        uint8_t* rowPointer = rowBuffer;
+    while(y < abs(DIBheader.biHeight) && screenPointer >= vram) {
+        while (yError <= 0) {
+            // A pointer to our current position on the row buffer
+            uint8_t* rowPointer = rowBuffer;
 
-        // How many bytes are left to copy from the input buffer to the row buffer
-        unsigned int bytesRemainingInRow = rowSize;
-
-        // If the end of the row is outside the input buffer, copy what's in the input buffer and load the next chunk into the input buffer
-        while (inputPointer + bytesRemainingInRow > inputBufferEnd) {
-            memcpy(rowPointer, inputPointer, inputBufferEnd - inputPointer);
-            rowPointer += inputBufferEnd - inputPointer;
-            bytesRemainingInRow -= inputBufferEnd - inputPointer;
-            inputPointer = inputBuffer;
-            if (!readFile(bitmapFile, inputBufferSize, inputBuffer)) {
-                os_PutStrFull(" !Read failed.!");
-                if (palette) {
-                    delete[] palette;
+            // How many bytes are left to copy from the input buffer to the row buffer
+            unsigned int bytesRemainingInRow = rowSize;
+            // If the end of the row is outside the input buffer, copy what's in the input buffer and load the next chunk into the input buffer
+            while (inputPointer + bytesRemainingInRow > inputBufferEnd) {
+                memcpy(rowPointer, inputPointer, inputBufferEnd - inputPointer);
+                rowPointer += inputBufferEnd - inputPointer;
+                bytesRemainingInRow -= inputBufferEnd - inputPointer;
+                inputPointer = inputBuffer;
+                if (!readFile(bitmapFile, inputBufferSize, inputBuffer)) {
+                    os_PutStrFull(" !Read failed.!");
+                    if (palette) {
+                        delete[] palette;
+                    }
+                    delete[] rowBuffer;
+                    delete[] inputBuffer;
+                    closeFile(bitmapFile);
+                    return false;
                 }
-                delete[] rowBuffer;
-                delete[] inputBuffer;
-                closeFile(bitmapFile);
-                return false;
             }
+
+            // Copy the rest of the row from the input buffer
+            memcpy(rowPointer, inputPointer, bytesRemainingInRow);
+
+            // Advance the pointer into the input buffer
+            inputPointer += bytesRemainingInRow;
+            yError += renderHeight;
+            y++;
         }
-
-        // Copy the rest of the row from the input buffer
-        memcpy(rowPointer, inputPointer, bytesRemainingInRow);
-
-        // Advance the pointer into the input buffer
-        inputPointer += bytesRemainingInRow;
-
         // Decide how to draw the row
         // If the image is already in 5-6-5 BGR, copy the pixels to vram directly
         // (I'll implement scaling later)
@@ -310,37 +356,39 @@ bool displayBitmap(const char* path, const char* name) {
         // draw it using the simpler displayRGBRow function.
         // Else, if it the image is in BITFIELDS mode, and it's not a native image, draw it using the slower but more comprehensive
         // displayBitFieldRow function
-        switch (displayMode) {
-            case indexed:
-                displayIndexedRow(rowBuffer, DIBheader.biWidth, DIBheader.biBitCount, palette, screenPointer);
-                break;
-            case indexed8:
-                displayIndexed8Row(rowBuffer, DIBheader.biWidth, palette, screenPointer);
-                break;
-            case native:
-                if (DIBheader.biWidth > 320) {
-                    memcpy(screenPointer, rowBuffer, 320*sizeof(uint16_t));
-                } else {
-                    memcpy(screenPointer, rowBuffer, DIBheader.biWidth*sizeof(uint16_t));
-                }
-                break;
-            case rgb1555:
-                displayRGBRow(rowBuffer, DIBheader.biWidth, 2, screenPointer, rgb1555to565);
-                break;
-            case rgb888:
-                displayRGBRow(rowBuffer, DIBheader.biWidth, bytesPerPixel, screenPointer, rgb888to565);
-                break;
-            case bitfields:
-                displayBitFieldRow(rowBuffer, DIBheader.biWidth, bytesPerPixel, screenPointer, &DIBheader);
-                break;
-            default:
-                break;
+        while (yError > 0) {
+            switch (displayMode) {
+                case indexed:
+                    displayIndexedRow(rowBuffer, DIBheader.biWidth, renderWidth, DIBheader.biBitCount, palette, screenPointer);
+                    break;
+                case indexed8:
+                    displayIndexed8Row(rowBuffer, DIBheader.biWidth, renderWidth, palette, screenPointer);
+                    break;
+                case native:
+                    if (DIBheader.biWidth > 320) {
+                        memcpy(screenPointer, rowBuffer, 320*sizeof(uint16_t));
+                    } else {
+                        memcpy(screenPointer, rowBuffer, DIBheader.biWidth*sizeof(uint16_t));
+                    }
+                    break;
+                case rgb1555:
+                    displayRGBRow(rowBuffer, DIBheader.biWidth, renderWidth, 2, screenPointer, rgb1555to565);
+                    break;
+                case rgb888:
+                    displayRGBRow(rowBuffer, DIBheader.biWidth, renderWidth, bytesPerPixel, screenPointer, rgb888to565);
+                    break;
+                case bitfields:
+                    displayBitFieldRow(rowBuffer, DIBheader.biWidth, renderWidth, bytesPerPixel, screenPointer, &DIBheader);
+                    break;
+                default:
+                    break;
+            }
+
+            // Move up 1 row in vram
+            screenPointer -= 320;
+            yError -= abs(DIBheader.biHeight);
         }
-
-        // Move up 1 row in vram
-        screenPointer -= 320;
     }
-
     // Remember to free that memory!
     if (palette) {
         delete[] palette;
