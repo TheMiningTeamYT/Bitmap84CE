@@ -315,8 +315,9 @@ bool displayBitmap(const char* path, const char* name) {
     int yError = 0;
     unsigned int y = 0;
 
-    // No where near to finished code -- Right now this assumes the image is bottom to top and already stored in 5-6-5 BGR
+    // Not finished code -- Right now this assumes the image is bottom to top
     while(y < abs(DIBheader.biHeight) && screenPointer >= vram) {
+        // Incredibly wasteful -- Large images could be read much faster if we didn't read then discard so many rows
         while (yError <= 0) {
             // A pointer to our current position on the row buffer
             uint8_t* rowPointer = rowBuffer;
