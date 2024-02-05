@@ -11,14 +11,11 @@ extern "C" {
     #include "usb.h"
 }
 
-#define vram ((uint16_t*)0xD40000)
 #define inputBufferSize 10*512
 
 /*
 Left to do:
-Handle images that are smaller/bigger than 320x240 (better than just cropping them)
 Implement scaling with linear interpolation
-Handle negative heights
 Check for invalid values in the bitmap header
 */
 
@@ -76,7 +73,7 @@ void displayIndexedRow(uint8_t* rowBuffer, int width, unsigned int renderWidth, 
     uint8_t bitMask = (1 << bitsPerPixel)-1;
     uint8_t pixelShift = 8 - bitsPerPixel;
     int xError = 0;
-    int x = 0;
+    unsigned int x = 0;
     while (x < width) {
         uint8_t index = (((*rowBuffer) >> pixelShift) & bitMask);
         while (xError > 0) {
@@ -91,6 +88,23 @@ void displayIndexedRow(uint8_t* rowBuffer, int width, unsigned int renderWidth, 
             } else {
                 pixelShift -= bitsPerPixel;
             }
+            xError += renderWidth;
+            x++;
+        }
+    }
+}
+
+void displayNativeRow(uint8_t* rowBuffer, int width, unsigned int renderWidth, uint16_t* screenPointer) {
+    int xError = 0;
+    unsigned int x = 0;
+    while (x < width) {
+        while (xError > 0) {
+            *screenPointer = *((uint16_t*)rowBuffer);
+            screenPointer++;
+            xError -= width;
+        }
+        while (xError <= 0) {
+            rowBuffer += 2;
             xError += renderWidth;
             x++;
         }
@@ -231,7 +245,7 @@ bool displayBitmap(const char* path, const char* name) {
 
     // Buffer for holding the palette (unused for now)
     // In the future, a function will be written to convert the 8-8-8-8 RGBA palette of bitmaps into 5-6-5 BGR colors for the display.
-    uint16_t* palette;
+    uint16_t* palette = nullptr;
 
     int8_t displayMode;
 
@@ -293,9 +307,10 @@ bool displayBitmap(const char* path, const char* name) {
     uint8_t* inputBufferEnd = inputBuffer + inputBufferSize;
 
     // A pointer to our current position in vram
-    uint16_t* screenPointer = vram + (320*239);
+    uint16_t* screenPointer = (DIBheader.biHeight < 0) ? vram : vram + (320*239);
+    int rowOffset = (DIBheader.biHeight < 0) ? 320 : -320;
 
-    // If the image doesn't fill the whole screen, adjust its starting position in vram to center the image
+    // Figure out how we need to scale and reposition the image
     unsigned int renderWidth;
     unsigned int renderHeight;
     float xRatio = 320.0f/(float)DIBheader.biWidth;
@@ -303,10 +318,20 @@ bool displayBitmap(const char* path, const char* name) {
     if (xRatio < yRatio) {
         renderWidth = 320;
         renderHeight = ((float)abs(DIBheader.biHeight))*xRatio;
-        screenPointer -= ((240-renderHeight)/2)*320;
+        if (DIBheader.biHeight < 0) {
+            screenPointer += ((240-renderHeight)/2)*320;
+        } else {
+            screenPointer -= ((240-renderHeight)/2)*320;
+        }
     } else {
         renderWidth = ((float)DIBheader.biWidth)*yRatio;
         screenPointer += (320-renderWidth)/2;
+        renderHeight = 240;
+    }
+    if (renderWidth > 320) {
+        renderWidth = 320;
+    }
+    if (renderHeight > 240) {
         renderHeight = 240;
     }
     // Clear out screen before writing the final image
@@ -316,9 +341,12 @@ bool displayBitmap(const char* path, const char* name) {
     unsigned int y = 0;
 
     // Not finished code -- Right now this assumes the image is bottom to top
-    while(y < abs(DIBheader.biHeight) && screenPointer >= vram) {
+    while(true) {
         // Incredibly wasteful -- Large images could be read much faster if we didn't read then discard so many rows
         while (yError <= 0) {
+            if (y >= abs(DIBheader.biHeight)) {
+                goto endOfImage;
+            }
             // A pointer to our current position on the row buffer
             uint8_t* rowPointer = rowBuffer;
 
@@ -366,11 +394,7 @@ bool displayBitmap(const char* path, const char* name) {
                     displayIndexed8Row(rowBuffer, DIBheader.biWidth, renderWidth, palette, screenPointer);
                     break;
                 case native:
-                    if (DIBheader.biWidth > 320) {
-                        memcpy(screenPointer, rowBuffer, 320*sizeof(uint16_t));
-                    } else {
-                        memcpy(screenPointer, rowBuffer, DIBheader.biWidth*sizeof(uint16_t));
-                    }
+                    displayNativeRow(rowBuffer, DIBheader.biWidth, renderWidth, screenPointer);
                     break;
                 case rgb1555:
                     displayRGBRow(rowBuffer, DIBheader.biWidth, renderWidth, 2, screenPointer, rgb1555to565);
@@ -386,10 +410,14 @@ bool displayBitmap(const char* path, const char* name) {
             }
 
             // Move up 1 row in vram
-            screenPointer -= 320;
+            screenPointer += rowOffset;
+            if (screenPointer < vram || screenPointer + renderWidth > vram + (240*320)) {
+                goto endOfImage;
+            }
             yError -= abs(DIBheader.biHeight);
         }
     }
+    endOfImage:
     // Remember to free that memory!
     if (palette) {
         delete[] palette;

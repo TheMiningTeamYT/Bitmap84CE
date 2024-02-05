@@ -1,4 +1,6 @@
+#pragma once
 #include <cstdint>
+#define vram ((uint16_t*)0xD40000)
 
 // i'm not gonna lie to ya: i'm just rewriting Microsoft's structs
 struct bitmapFileHeader {

@@ -1,0 +1,7 @@
+global_palette.h
+global_palette.c
+directory_closed.h
+directory_closed.c
+image_old_jpeg.h
+image_old_jpeg.c
+gfx.h

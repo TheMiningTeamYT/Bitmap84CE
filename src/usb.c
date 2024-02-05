@@ -88,7 +88,6 @@ bool init_USB() {
 fat_file_t* openFile(const char* sourcePath, const char* sourceName, bool create) {
     char* path = stringToUpper(sourcePath);
     char* name = stringToUpper(sourceName);
-    fat_error_t faterr;
     usb_WaitForEvents();
     fat_file_t* file = calloc(1, sizeof(fat_file_t));
     char str[256];
@@ -134,6 +133,26 @@ void closeFile(fat_file_t* file) {
         usb_WaitForEvents();
         fat_CloseFile(file);
         free(file);
+    }
+}
+
+fat_dir_t* openDir(const char* sourcePath) {
+    char* path = stringToUpper(sourcePath);
+    usb_WaitForEvents();
+    fat_dir_t* folder = calloc(1, sizeof(fat_dir_t));
+    if (fat_OpenDir(&global.fat, path, folder)) {
+        free(path);
+        free(folder);
+        return NULL;
+    }
+    free(path);
+    return folder;
+}
+
+void closeDir(fat_dir_t* folder) {
+    if (folder) {
+        fat_CloseDir(folder);
+        free(folder);
     }
 }
 
