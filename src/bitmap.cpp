@@ -238,6 +238,7 @@ bool displayBitmap(const char* path, const char* name) {
     unsigned int bytesPerPixel = DIBheader.biBitCount/8;
 
     // How many bytes each row of the bitmap takes up
+    // This weird math is to account for the fact that each row is padded to be a multiple of 4 bytes long
     unsigned int rowSize = (((DIBheader.biBitCount*DIBheader.biWidth)+31)/32)*4;
 
     // Buffer for holding a complete row from the image
