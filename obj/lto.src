@@ -6744,7 +6744,7 @@ _main:
 	ld	hl, 160
 	or	a, a
 	sbc	hl, de
-	ld	de, 0
+	ld	de, 3
 	push	de
 	push	hl
 	ld	hl, _.str.9
@@ -7434,19 +7434,6 @@ _main:
 	ld	hl, 6
 	add	hl, sp
 	ld	sp, hl
-	call	_gfx_SwapDraw
-BB26_1:
-	call	_os_GetCSC
-	or	a, a
-	jr	z, BB26_1
-	call	_init_USB
-	bit	0, a
-	jp	nz, BB26_6
-	or	a, a
-	sbc	hl, hl
-	push	hl
-	call	_gfx_Blit
-	pop	hl
 	ld	hl, _.str.29
 	push	hl
 	call	_gfx_GetStringWidth
@@ -7468,6 +7455,54 @@ BB26_1:
 	add	hl, sp
 	ld	sp, hl
 	ld	hl, _.str.29
+	push	hl
+	call	_gfx_PrintString
+	pop	hl
+	call	_gfx_GetTextY
+	ld	de, 10
+	add	hl, de
+	push	hl
+	or	a, a
+	sbc	hl, hl
+	push	hl
+	call	_gfx_SetTextXY
+	ld	hl, 6
+	add	hl, sp
+	ld	sp, hl
+	call	_gfx_SwapDraw
+BB26_1:
+	call	_os_GetCSC
+	or	a, a
+	jr	z, BB26_1
+	call	_init_USB
+	bit	0, a
+	jp	nz, BB26_6
+	or	a, a
+	sbc	hl, hl
+	push	hl
+	call	_gfx_Blit
+	pop	hl
+	ld	hl, _.str.30
+	push	hl
+	call	_gfx_GetStringWidth
+	pop	de
+	ld	c, 1
+	call	__ishru
+	push	hl
+	pop	de
+	ld	hl, 160
+	or	a, a
+	sbc	hl, de
+	ld	(ix - 3), hl
+	call	_gfx_GetTextY
+	push	hl
+	ld	hl, (ix - 3)
+	push	hl
+	call	_gfx_SetTextXY
+	ld	hl, 6
+	add	hl, sp
+	ld	sp, hl
+	ld	hl, _.str.30
 	push	hl
 	call	_gfx_PrintString
 	pop	hl
@@ -7508,7 +7543,7 @@ BB26_6:
 	push	hl
 	call	_gfx_SetDraw
 	pop	hl
-	ld	hl, 1
+	ld	hl, 2
 	push	hl
 	push	hl
 	call	_gfx_SetTextScale
@@ -7530,7 +7565,7 @@ BB26_6:
 	push	hl
 	call	_gfx_FillScreen
 	pop	hl
-	ld	hl, _.str.30
+	ld	hl, _.str.31
 	push	hl
 	call	_gfx_GetStringWidth
 	pop	de
@@ -7544,7 +7579,54 @@ BB26_6:
 	ld	de, 0
 	push	de
 	push	hl
-	ld	hl, _.str.30
+	ld	hl, _.str.31
+	push	hl
+	call	_gfx_PrintStringXY
+	ld	hl, 9
+	add	hl, sp
+	ld	sp, hl
+	ld	hl, _.str.32
+	push	hl
+	call	_gfx_GetStringWidth
+	pop	de
+	ld	c, 1
+	call	__ishru
+	push	hl
+	pop	de
+	ld	hl, 160
+	or	a, a
+	sbc	hl, de
+	ld	de, 20
+	push	de
+	push	hl
+	ld	hl, _.str.32
+	push	hl
+	call	_gfx_PrintStringXY
+	ld	hl, 9
+	add	hl, sp
+	ld	sp, hl
+	ld	hl, 1
+	push	hl
+	push	hl
+	call	_gfx_SetTextScale
+	ld	hl, 6
+	add	hl, sp
+	ld	sp, hl
+	ld	hl, _.str.33
+	push	hl
+	call	_gfx_GetStringWidth
+	pop	de
+	ld	c, 1
+	call	__ishru
+	push	hl
+	pop	de
+	ld	hl, 160
+	or	a, a
+	sbc	hl, de
+	ld	de, 40
+	push	de
+	push	hl
+	ld	hl, _.str.33
 	push	hl
 	call	_gfx_PrintStringXY
 	ld	hl, 9
@@ -7676,7 +7758,7 @@ _.str.8:
 	section	.rodata,"a",@progbits
 	private	_.str.9
 _.str.9:
-	db	"Welcome to PicView!", 0
+	db	"Welcome to Bitmap84CE!", 0
 
 	section	.rodata,"a",@progbits
 	private	_.str.10
@@ -7691,97 +7773,112 @@ _.str.11:
 	section	.rodata,"a",@progbits
 	private	_.str.12
 _.str.12:
-	db	"Controls:", 0
+	db	"Made by Logan C.", 0
 
 	section	.rodata,"a",@progbits
 	private	_.str.13
 _.str.13:
-	db	"Press up/down to scroll up/down", 0
+	db	"Controls:", 0
 
 	section	.rodata,"a",@progbits
 	private	_.str.14
 _.str.14:
-	db	"the list of files.", 0
+	db	"Press up/down to scroll up/down the list of", 0
 
 	section	.rodata,"a",@progbits
 	private	_.str.15
 _.str.15:
-	db	"Press enter to enter a folder or", 0
+	db	"files.", 0
 
 	section	.rodata,"a",@progbits
 	private	_.str.16
 _.str.16:
-	db	"display an image.", 0
+	db	"Press enter to enter a folder or display an", 0
 
 	section	.rodata,"a",@progbits
 	private	_.str.17
 _.str.17:
-	db	"To back out of a folder, enter the", 0
+	db	"image.", 0
 
 	section	.rodata,"a",@progbits
 	private	_.str.18
 _.str.18:
-	db	"folder called "".."".", 0
+	db	"To back out of a folder, enter the folder", 0
 
 	section	.rodata,"a",@progbits
 	private	_.str.19
 _.str.19:
-	db	"To exit, press ""clear"".", 0
+	db	"called "".."".", 0
 
 	section	.rodata,"a",@progbits
 	private	_.str.20
 _.str.20:
-	db	"Please insert a FAT32 formatted USB drive", 0
+	db	"To exit, press ""clear"".", 0
 
 	section	.rodata,"a",@progbits
 	private	_.str.21
 _.str.21:
-	db	"containing any images you want to view", 0
+	db	"Please insert a FAT32 formatted USB drive", 0
 
 	section	.rodata,"a",@progbits
 	private	_.str.22
 _.str.22:
-	db	"(do not remove it until you exit)", 0
+	db	"containing any images you want to view,", 0
 
 	section	.rodata,"a",@progbits
 	private	_.str.23
 _.str.23:
-	db	"and press any key to continue.", 0
+	db	"(do not remove it until you exit),", 0
 
 	section	.rodata,"a",@progbits
 	private	_.str.24
 _.str.24:
-	db	"(For best results, resize the images", 0
+	db	"and press any key to continue.", 0
 
 	section	.rodata,"a",@progbits
 	private	_.str.25
 _.str.25:
-	db	"to be 320x240 pixels or smaller before", 0
+	db	"(For best results, resize the images", 0
 
 	section	.rodata,"a",@progbits
 	private	_.str.26
 _.str.26:
-	db	"loading them onto your calculator.", 0
+	db	"to be 320x240 pixels or smaller before", 0
 
 	section	.rodata,"a",@progbits
 	private	_.str.27
 _.str.27:
-	db	"Only images in bitmap format", 0
+	db	"loading them onto your calculator.", 0
 
 	section	.rodata,"a",@progbits
 	private	_.str.28
 _.str.28:
-	db	"are supported.)", 0
+	db	"Only images in bitmap format", 0
 
 	section	.rodata,"a",@progbits
 	private	_.str.29
 _.str.29:
-	db	"Failed to open USB. Press any key to continue.", 0
+	db	"are currently supported.)", 0
 
 	section	.rodata,"a",@progbits
 	private	_.str.30
 _.str.30:
-	db	"You may now remove your USB drive.", 0
+	db	"Failed to open USB. Press any key to continue.", 0
+
+	section	.rodata,"a",@progbits
+	private	_.str.31
+_.str.31:
+	db	"You may now remove", 0
+
+	section	.rodata,"a",@progbits
+	private	_.str.32
+_.str.32:
+	db	"your USB drive.", 0
+
+	section	.rodata,"a",@progbits
+	private	_.str.33
+_.str.33:
+	db	"Thank you for using Bitmap84CE.", 0
 
 	ident	"clang version 15.0.0 (https://github.com/jacobly0/llvm-project 5f8512f22751066573aa48ac848a6d2195838ac3)"
 	ident	"clang version 15.0.0 (https://github.com/jacobly0/llvm-project 5f8512f22751066573aa48ac848a6d2195838ac3)"

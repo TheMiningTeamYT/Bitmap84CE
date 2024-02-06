@@ -1,4 +1,4 @@
-NAME = PICVIEW
+NAME = BMP84CE
 DESCRIPTION = "High quality image viewer for the TI 84 Plus CE"
 COMPRESSED = YES
 COMPRESSED_MODE = zx7
