@@ -1,5 +1,4 @@
+
 [submodule "src/picojpeg"]
 	path = src/picojpeg
 	url = git@github.com:TheMiningTeamYT/picojpeg.git
-[submodule "master"]
-	branch = src/picojpeg/
