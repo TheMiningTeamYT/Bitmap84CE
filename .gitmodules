@@ -1,3 +1,3 @@
 [submodule "src/picojpeg"]
 	path = src/picojpeg
-	url = https://github.com/richgel999/picojpeg.git
+	url = git@github.com:TheMiningTeamYT/picojpeg.git
