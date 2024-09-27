@@ -11,20 +11,24 @@ Licensed under the LGPLv3 https://github.com/CE-Programming/toolchain/blob/maste
 #include <fatdrvce.h>
 #include <msddrvce.h>
 #include <usbdrvce.h>
-#include <ti/getcsc.h>
 #include <ti/screen.h>
+#include <ti/getcsc.h>
 #include "usb.h"
 
 static msd_partition_t partitions[MAX_PARTITIONS];
 static global_t global;
+static char name[16];
+static char path[256];
 
-// string returned by this needs to be freed
-char* stringToUpper(const char* str) {
-    char* newString = calloc(strlen(str) + 1, sizeof(char));
-    for (unsigned int i = 0; str[i]; i++) {
-        newString[i] = toupper(str[i]);
+void stringToUpper(char* buffer, size_t bufferLength, const char* str) {
+    size_t i = 0;
+    bufferLength -= 1;
+    while (str[i] && bufferLength) {
+        buffer[i] = toupper(str[i]);
+        bufferLength--;
+        i++;
     }
-    return newString;
+    buffer[i] = 0;
 }
 
 usb_error_t handleUsbEvent(usb_event_t event, void *event_data, usb_callback_data_t *global) {
@@ -86,31 +90,28 @@ bool init_USB() {
 }
 
 fat_file_t* openFile(const char* sourcePath, const char* sourceName, bool create) {
-    char* path = stringToUpper(sourcePath);
-    char* name = stringToUpper(sourceName);
-    usb_WaitForEvents();
     fat_file_t* file = calloc(1, sizeof(fat_file_t));
-    char str[256];
-    strncpy(str, path, 256);
-    str[255] = 0;
-    if (str[strlen(str) - 1] != '/') {
-        strcat(str, "/");
-    }
-    strncat(str, name, 256-strlen(str));
-    str[255] = 0;
-    free(path);
-    free(name);
-    if (create) {
-        if (fat_Create(&global.fat, path, name, 0)) {
+    stringToUpper(name, 16, sourceName);
+    if (sourcePath[0] == 0) {
+        if (fat_OpenFile(&global.fat, name, 0, file) != FAT_SUCCESS) {
+            /*printStringAndMoveDownCentered("Failed to open file");
+            printStringAndMoveDownCentered(str);*/
             free(file);
             return NULL;
         }
-    }
-    if (fat_OpenFile(&global.fat, str, 0, file)) {
-        /*printStringAndMoveDownCentered("Failed to open file");
-        printStringAndMoveDownCentered(str);*/
-        free(file);
-        return NULL;
+    } else {
+        stringToUpper(path, 256, sourcePath);
+        if (path[strlen(path) - 1] != '/') {
+            strncat(path, "/", 255-strlen(path));
+        }
+        strncat(path, name, 255-strlen(path));
+        if (create) {
+            fat_Create(&global.fat, path, name, 0);
+        }
+        if (fat_OpenFile(&global.fat, path, 0, file) != FAT_SUCCESS) {
+            free(file);
+            return NULL;
+        }
     }
     // cursed hack to add support for created/modified dates
     time_t currentTime;
@@ -130,22 +131,18 @@ fat_file_t* openFile(const char* sourcePath, const char* sourceName, bool create
 
 void closeFile(fat_file_t* file) {
     if (file != NULL) {
-        usb_WaitForEvents();
         fat_CloseFile(file);
         free(file);
     }
 }
 
 fat_dir_t* openDir(const char* sourcePath) {
-    char* path = stringToUpper(sourcePath);
-    usb_WaitForEvents();
     fat_dir_t* folder = calloc(1, sizeof(fat_dir_t));
-    if (fat_OpenDir(&global.fat, path, folder)) {
-        free(path);
+    stringToUpper(path, 256, sourcePath);
+    if (fat_OpenDir(&global.fat, path, folder) != FAT_SUCCESS) {
         free(folder);
         return NULL;
     }
-    free(path);
     return folder;
 }
 
@@ -156,23 +153,23 @@ void closeDir(fat_dir_t* folder) {
     }
 }
 
-bool readFile(fat_file_t* file, uint24_t bufferSize, void* buffer) {
+bool readFile(fat_file_t* file, size_t bufferSize, void* buffer) {
     if (file == NULL) {
         return false;
     }
-    uint32_t readSize = ((fat_GetFileSize(file) + 511)/MSD_BLOCK_SIZE) - fat_GetFileBlockOffset(file);
-    if (readSize * MSD_BLOCK_SIZE > bufferSize) {
-        readSize = bufferSize/MSD_BLOCK_SIZE;
+    size_t readSize = ((fat_GetFileSize(file) + 511)/FAT_BLOCK_SIZE) - fat_GetFileBlockOffset(file);
+    if (readSize > bufferSize) {
+        readSize = bufferSize;
     }
     bool good = fat_ReadFile(file, readSize, buffer) == readSize;
     return good;
 }
 
-bool writeFile(fat_file_t* file, uint24_t size, void* buffer) {
+bool writeFile(fat_file_t* file, size_t size, void* buffer) {
     if (file == NULL) {
         return false;
     }
-    uint24_t writeBlocks = (size + MSD_BLOCK_SIZE - 1)/MSD_BLOCK_SIZE;
+    size_t writeBlocks = (size + FAT_BLOCK_SIZE - 1)/FAT_BLOCK_SIZE;
     if (fat_SetFileSize(file, size)) {
         // printStringAndMoveDownCentered("Failed to set size");
         return false;
@@ -189,46 +186,62 @@ bool writeFile(fat_file_t* file, uint24_t size, void* buffer) {
     return good;
 }
 
+bool seekFile(fat_file_t* file, size_t blockOffset, seek_origin_t origin) {
+    // All of these numbers are in blocks.
+    size_t pos;
+    size_t fileSize;
+    if (file == NULL) {
+        return false;
+    }
+    fileSize = ((fat_GetFileSize(file) + 511)/FAT_BLOCK_SIZE);
+    switch (origin) {
+        case set:
+            pos = blockOffset;
+            break;
+        case cur:
+            pos = fat_GetFileBlockOffset(file) + blockOffset;
+            break;
+        case end:
+            pos = fileSize - blockOffset;
+            break;
+        default:
+            break;
+    }
+    if (pos < 0 || pos > fileSize) {
+        return false;
+    }
+    return fat_SetFileBlockOffset(file, pos) == FAT_SUCCESS;
+}
+
 bool createDirectory(const char* sourcePath, const char* sourceName) {
     fat_error_t faterr;
-    char* path = stringToUpper(sourcePath);
-    char* name = stringToUpper(sourceName);
-    usb_WaitForEvents();
+    stringToUpper(name, 16, sourceName);
+    stringToUpper(path, 256, sourcePath);
     faterr = fat_Create(&global.fat, path, name, FAT_DIR);
-    free(path);
-    free(name);
     if (faterr != FAT_SUCCESS && faterr != FAT_ERROR_EXISTS) {
         return false;
     }
     return true;
 } 
 
-int24_t getSizeOf(fat_file_t* file) {
+uint32_t getSizeOf(fat_file_t* file) {
     if (file == NULL) {
         return 0;
     }
-    int24_t size = fat_GetFileSize(file);
-    return size;
+    return fat_GetFileSize(file);
 }
 
 void deleteFile(const char* sourcePath, const char* sourceName) {
-    char* path = stringToUpper(sourcePath);
-    char* name = stringToUpper(sourceName);
-    usb_WaitForEvents();
-    char str[256];
-    strncpy(str, path, 256);
-    str[255] = 0; 
-    if (str[strlen(str) - 1] != '/') {
-        strncat(str, "/", 256-strlen(str));
+    stringToUpper(name, 16, sourceName);
+    stringToUpper(path, 256, sourcePath);
+    if (path[strlen(path) - 1] != '/') {
+        strncat(path, "/", 255-strlen(path));
     }
-    strncat(str, name, 256-strlen(str));
-    fat_Delete(&global.fat, str);
-    free(path);
-    free(name);
+    strncat(path, name, 255-strlen(path));
+    fat_Delete(&global.fat, path);
 }
 
 void close_USB() {
-    usb_WaitForEvents();
     if (global.fatInit == true) {
         fat_Close(&global.fat);
     }

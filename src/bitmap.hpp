@@ -1,6 +1,6 @@
 #pragma once
 #include <cstdint>
-#define vram ((uint16_t*)0xD40000)
+#include <fatdrvce.h>
 
 // i'm not gonna lie to ya: i'm just rewriting Microsoft's structs
 struct bitmapFileHeader {
@@ -43,16 +43,22 @@ enum biCompressionMode {
 
 enum bppModes {
     indexed = 0,
-    indexed8 = 1,
-    native = 2,
-    rgb1555 = 3,
-    rgb888 = 4,
-    bitfields = 5
+    indexed8,
+    native,
+    rgb888,
+    rgba8888,
+    bitfields
+};
+
+struct BitfieldMasks {
+    uint32_t redMask;
+    uint32_t greenMask;
+    uint32_t blueMask;
+    uint32_t alphaMask;
+    int8_t redMaskShift;
+    int8_t greenMaskShift;
+    int8_t blueMaskShift;
+    int8_t alphaMaskShift;
 };
 
 bool displayBitmap(const char* path, const char* name);
-
-extern "C" {
-    uint16_t rgb888to565(uint8_t* triplet);
-    uint16_t rgb1555to565(uint8_t* triplet);
-}

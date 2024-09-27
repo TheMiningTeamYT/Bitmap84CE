@@ -4,6 +4,15 @@
         "bit": "cpp",
         "chrono": "cpp",
         "cstdint": "cpp",
-        "cstdlib": "cpp"
+        "cstdlib": "cpp",
+        "initializer_list": "c",
+        "array": "c",
+        "hash_map": "c",
+        "string_view": "c",
+        "utility": "c",
+        "screen.h": "c",
+        "keypadc.h": "c",
+        "usb.h": "c",
+        "typeinfo": "cpp"
     }
 }

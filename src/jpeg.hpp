@@ -1,0 +1,1 @@
+bool displayJPEG(const char* path, const char* name);

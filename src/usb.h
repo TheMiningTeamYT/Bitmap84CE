@@ -17,15 +17,26 @@ struct global {
     bool fatInit;
 };
 
+typedef enum seek_origin {
+    set = 0,
+    cur,
+    end
+} seek_origin_t;
+
 fat_dir_t* openDir(const char* sourcePath);
 void closeDir(fat_dir_t* folder);
 usb_error_t handleUsbEvent(usb_event_t event, void *event_data, usb_callback_data_t *global);
-bool readFile(fat_file_t* file, uint24_t bufferSize, void* buffer);
-bool writeFile(fat_file_t* file, uint24_t size, void* buffer);
+
+// Takes size in blocks
+bool readFile(fat_file_t* file, size_t bufferSize, void* buffer);
+
+bool writeFile(fat_file_t* file, size_t size, void* buffer);
 bool createDirectory(const char* path, const char* name);
+bool seekFile(fat_file_t* file, size_t blockOffset, seek_origin_t origin);
 fat_file_t* openFile(const char* path, const char* name, bool create);
 void closeFile(fat_file_t* file);
-int24_t getSizeOf(fat_file_t* file);
+uint32_t getSizeOf(fat_file_t* file);
 void deleteFile(const char* path, const char* name);
 bool init_USB();
 void close_USB();
+void stringToUpper(char* buffer, size_t bufferLength, const char* str);
