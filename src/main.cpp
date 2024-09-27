@@ -10,10 +10,10 @@
 #include "jpeg.hpp"
 #include "font.hpp"
 #include "common.h"
+#include "usb.h"
 
 extern "C" {
     #include <msddrvce.h>
-    #include "usb.h"
     int32_t abs_long(int32_t x);
 }
 

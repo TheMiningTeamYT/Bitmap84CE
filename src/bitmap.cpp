@@ -7,9 +7,9 @@
 #include <ti/getcsc.h>
 #include "bitmap.hpp"
 #include "common.h"
+#include "usb.h"
 
 extern "C" {
-    #include "usb.h"
     int32_t abs_long(int32_t x);
     // Draws a row of rgb888 pixels
     // Only used in cases where each pixel is 3 bytes

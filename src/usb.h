@@ -23,6 +23,10 @@ typedef enum seek_origin {
     end
 } seek_origin_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 fat_dir_t* openDir(const char* sourcePath);
 void closeDir(fat_dir_t* folder);
 usb_error_t handleUsbEvent(usb_event_t event, void *event_data, usb_callback_data_t *global);
@@ -40,3 +44,7 @@ void deleteFile(const char* path, const char* name);
 bool init_USB();
 void close_USB();
 void stringToUpper(char* buffer, size_t bufferLength, const char* str);
+
+#ifdef __cplusplus
+}
+#endif
