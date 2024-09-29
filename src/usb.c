@@ -114,7 +114,7 @@ fat_file_t* openFile(const char* sourcePath, const char* sourceName, bool create
         }
     }
     // cursed hack to add support for created/modified dates
-    time_t currentTime;
+    /*time_t currentTime;
     time(&currentTime);
     struct tm* currentLocalTime = localtime(&currentTime);
     uint16_t* entryPointer = *((uint16_t**)(&file->priv[40]));
@@ -125,7 +125,32 @@ fat_file_t* openFile(const char* sourcePath, const char* sourceName, bool create
     if (create) {
         entryPointer[7] = entryPointer[11];
         entryPointer[8] = entryPointer[12];
+    }*/
+    return file;
+}
+
+fat_file_t* openFileNoPath(const char* sourcePath) {
+    fat_file_t* file = calloc(1, sizeof(fat_file_t));
+    stringToUpper(path, 256, sourcePath);
+    if (fat_OpenFile(&global.fat, path, 0, file) != FAT_SUCCESS) {
+        /*printStringAndMoveDownCentered("Failed to open file");
+        printStringAndMoveDownCentered(str);*/
+        free(file);
+        return NULL;
     }
+    // cursed hack to add support for created/modified dates
+    /*time_t currentTime;
+    time(&currentTime);
+    struct tm* currentLocalTime = localtime(&currentTime);
+    uint16_t* entryPointer = *((uint16_t**)(&file->priv[40]));
+    ((uint8_t*)entryPointer)[11] = FAT_ARCHIVE;
+    ((uint8_t*)entryPointer)[13] = 0;
+    entryPointer[11] = ((currentLocalTime->tm_sec)>>1) + (currentLocalTime->tm_min<<5) + (currentLocalTime->tm_hour<<11);
+    entryPointer[9] = entryPointer[12] = (currentLocalTime->tm_mday) + ((currentLocalTime->tm_mon + 1) << 5) + ((currentLocalTime->tm_year - 80)<<9);
+    if (create) {
+        entryPointer[7] = entryPointer[11];
+        entryPointer[8] = entryPointer[12];
+    }*/
     return file;
 }
 

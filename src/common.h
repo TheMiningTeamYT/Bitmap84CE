@@ -1,5 +1,9 @@
 #define vram ((uint16_t*)0xD40000)
 #define inputBufferSize (32*(FAT_BLOCK_SIZE))
+// Workaround to make VS code stop yelling at me
+#ifndef uint24_t
+typedef unsigned int uint24_t;
+#endif
 
 // Used by rgb888to565.
 // Should be zeroed out at the start of a row.
@@ -9,6 +13,7 @@ typedef uint24_t ColorError;
 extern "C" {
 #endif
 uint16_t rgb888to565(uint8_t* triplet, ColorError* err);
+uint16_t rgb888beto565(uint8_t* triplet, ColorError* err);
 void spiCmd(uint8_t cmd);
 void spiParam(uint8_t cmd);
 void boot_InitializeHardware();

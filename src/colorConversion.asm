@@ -15,6 +15,7 @@ _rgb888to565:
     inc hl ; 4
     inc hl ; 4
     ld a, (hl) ; 8
+load_colorError:
     ; Load the pointer to the ColorError struct into HL
     ld hl, (iy + 6) ; 24
 
@@ -89,6 +90,28 @@ blue_cont:
     rr l ; 8
     ; Return
     ret ; 18
+
+section .text
+public _rgb888beto565
+; Arguments:
+; sp[3-5]: Pointer to an RGB 888be triplet
+; sp[6-8]: Pointer to a ColorError struct
+; Returns:
+; hl: BGR565 triplet (for use with the calculator's display)
+_rgb888beto565:
+    ; Init IY
+    ld iy, 0 ; 20
+    add iy, sp ; 8
+    ; Load the RGB 888le triplet into A:DE
+    ld hl, (iy + 3) ; 24
+    ld de, (hl) ; 20
+    inc hl ; 4
+    inc hl ; 4
+    ; Swap the MSB and the LSB
+    ld e, a ; 4
+    ld e, (hl) ; 8
+    ; Jump to the common code
+    jr load_colorError ; 12
     
 section .text
 public _abs_long

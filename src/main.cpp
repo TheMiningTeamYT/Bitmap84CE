@@ -8,9 +8,14 @@
 #include "gfx/gfx.h"
 #include "bitmap.hpp"
 #include "jpeg.hpp"
+#include "png.hpp"
 #include "font.hpp"
 #include "common.h"
 #include "usb.h"
+
+#ifndef PNG
+#define PNG
+#endif
 
 extern "C" {
     #include <msddrvce.h>
@@ -20,6 +25,7 @@ extern "C" {
 enum fileEntryOptions {
     bitmap = 1 << 0,
     jpeg = 1 << 1,
+    png = 1 << 2,
     dir = FAT_DIR
 };
 
@@ -93,7 +99,12 @@ void fileSelectMenu() {
         while (currentDirEntry.name[0]) {
             if ((currentDirEntry.attrib & FAT_DIR) || 
                 (strcmp(currentDirEntry.name + (strlen(currentDirEntry.name)-4), ".BMP") == 0) || 
-                (strcmp(currentDirEntry.name + (strlen(currentDirEntry.name)-4), ".JPG") == 0)) {
+                (strcmp(currentDirEntry.name + (strlen(currentDirEntry.name)-4), ".JPG") == 0)
+                #ifdef PNG 
+                ||
+                (strcmp(currentDirEntry.name + (strlen(currentDirEntry.name)-4), ".PNG") == 0)
+                #endif
+                ) {
                 if (numberOfEntries >= bufferSize) {
                     bufferSize *= 2;
                     entries = static_cast<fileEntry*>(realloc(entries, sizeof(fileEntry)*(bufferSize)));
@@ -103,9 +114,10 @@ void fileSelectMenu() {
                 }
                 if (strcmp(currentDirEntry.name + (strlen(currentDirEntry.name)-4), ".BMP") == 0) {
                     entries[numberOfEntries].options = bitmap;
-                }
-                if (strcmp(currentDirEntry.name + (strlen(currentDirEntry.name)-4), ".JPG") == 0) {
+                } else if (strcmp(currentDirEntry.name + (strlen(currentDirEntry.name)-4), ".JPG") == 0) {
                     entries[numberOfEntries].options = jpeg;
+                } else if (strcmp(currentDirEntry.name + (strlen(currentDirEntry.name)-4), ".PNG") == 0) {
+                    entries[numberOfEntries].options = png;
                 }
                 // Safe because it's not possible for a FAT32 file to have a name longer than 12 characters (8.3 filenames)
                 strcpy(entries[numberOfEntries].name, currentDirEntry.name);
@@ -173,6 +185,11 @@ void fileSelectMenu() {
                             } else if (entries[selectedFile + offset].options & jpeg) {
                                 status = displayJPEG(currentDirPath, entries[selectedFile + offset].name);
                             }
+                            #ifdef PNG
+                            else if (entries[selectedFile + offset].options & png) {
+                                status = displayPNG(currentDirPath, entries[selectedFile + offset].name);
+                            }
+                            #endif
                             while (!os_GetCSC());
                             gfxStart();
                             gfx_SetTextScale(2, 2);

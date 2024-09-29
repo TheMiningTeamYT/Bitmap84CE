@@ -38,6 +38,7 @@ bool writeFile(fat_file_t* file, size_t size, void* buffer);
 bool createDirectory(const char* path, const char* name);
 bool seekFile(fat_file_t* file, size_t blockOffset, seek_origin_t origin);
 fat_file_t* openFile(const char* path, const char* name, bool create);
+fat_file_t* openFileNoPath(const char* sourcePath);
 void closeFile(fat_file_t* file);
 uint32_t getSizeOf(fat_file_t* file);
 void deleteFile(const char* path, const char* name);

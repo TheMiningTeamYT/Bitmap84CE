@@ -127,7 +127,9 @@ bool displayJPEG(const char* path, const char* name) {
     // Decode status
     bool status;
 
-    // This code is nowhere near done, it's just for testing to see if picojpeg will work.
+    // Clear out screen before writing the final image
+    memset(vram, 0, (320*240)*sizeof(uint16_t));
+    
     // Open the JPEG file
     if (!jpegOpenFile(path, name, &callbackData)) {
         jpegCloseFile(&callbackData);
@@ -165,9 +167,6 @@ bool displayJPEG(const char* path, const char* name) {
     }
 
     rowPointer = screenPointer;
-
-    // Clear out screen before writing the final image
-    memset(vram, 0, (320*240)*sizeof(uint16_t));
 
     // Decode the MCUs and draw them to the screen!
     while ((status = pjpeg_decode_mcu()) != PJPG_NO_MORE_BLOCKS && !os_GetCSC()) {

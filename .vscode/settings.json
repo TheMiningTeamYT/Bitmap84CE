@@ -13,6 +13,7 @@
         "screen.h": "c",
         "keypadc.h": "c",
         "usb.h": "c",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "random": "c"
     }
 }
