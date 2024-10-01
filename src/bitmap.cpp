@@ -71,7 +71,7 @@ void displayIndexedRow(uint8_t* rowBuffer, int width, unsigned int renderWidth, 
 // Takes a bitmap color table and converts it to a BGR 565 palette
 void generatePalette(unsigned int colors, uint8_t* colorTable, uint16_t* palette) {
     for (unsigned int i = 0; i < colors; i++) {
-        ColorError err;
+        ColorError err = 0;
         palette[i] = rgb888to565(colorTable, &err);
         colorTable += 4;
     }
