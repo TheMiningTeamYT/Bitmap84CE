@@ -108,7 +108,7 @@ _rgb888beto565:
     inc hl ; 4
     inc hl ; 4
     ; Swap the MSB and the LSB
-    ld e, a ; 4
+    ld a, e ; 4
     ld e, (hl) ; 8
     ; Jump to the common code
     jr load_colorError ; 12

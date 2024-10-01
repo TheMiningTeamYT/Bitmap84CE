@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <cstdint>
 #include <fatdrvce.h>
+#include <debug.h>
 #include <ti/screen.h>
 #include <ti/getcsc.h>
 #include <sys/lcd.h>
@@ -45,7 +46,7 @@ void PNG_draw(pngle_t* pngle, uint32_t x, uint32_t y, uint32_t w, uint32_t h, ui
         return;
     }
     unsigned int screenX = (((unsigned int)x)*(callbackData->renderWidth))/(callbackData->width);
-    unsigned int screenY = (((unsigned int)y)*(callbackData->renderWidth))/(callbackData->width);
+    unsigned int screenY = (((unsigned int)y)*(callbackData->renderHeight))/(callbackData->height);
     uint16_t* screenPointer = callbackData->startingScreenPointer + (screenY*320) + screenX;
     ColorError err = 0;
     if ((*screenPointer) == 0 && screenPointer != callbackData->lastScreenPointer) {
@@ -81,6 +82,8 @@ void PNG_init(pngle_t* pngle, uint32_t w, uint32_t h) {
             callbackData->renderHeight = 240;
         }
     }
+    callbackData->width = w;
+    callbackData->height = h;
 }
 
 util_FileHandle* util_OpenFile(const char* path, const char* name) {
@@ -167,6 +170,8 @@ int util_ReadFile(util_FileHandle* handle, uint8_t* buf, size_t len) {
 bool displayPNG(const char* path, const char* name) {
     pngDrawData persistent;
     uint8_t buf[1024];
+    int remain = 0;
+    int len;
     util_FileHandle* handle;
     pngle_t* pngle = pngle_new();
     // If pngle failed to intialize, return
@@ -182,10 +187,23 @@ bool displayPNG(const char* path, const char* name) {
     pngle_set_user_data(pngle, &persistent);
     pngle_set_init_callback(pngle, PNG_init);
     pngle_set_draw_callback(pngle, PNG_draw);
+
+    // Clear out screen before writing the final image
+    memset(vram, 0, (320*240)*sizeof(uint16_t));
+
     // Feed data to pngle
-    if (pngle_feed(pngle, inputBuffer, inputBufferSize) < 0) {
-        os_PutStrFull("!PNGLE error! ");
-        os_PutStrFull(pngle_error(pngle));
+    while ((len = util_ReadFile(handle, buf + remain, sizeof(buf) - remain)) > 0 && !os_GetCSC()) {
+        int fed = pngle_feed(pngle, buf, remain + len);
+        if (fed < 0) {
+            os_PutStrFull("!PNGLE error! ");
+            os_PutStrFull(pngle_error(pngle));
+            pngle_destroy(pngle);
+            return false;
+        }
+        remain = remain + len - fed;
+        if (remain > 0) {
+            memmove(buf, buf + fed, remain);
+        }
     }
     pngle_destroy(pngle);
     return true;

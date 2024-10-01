@@ -1396,7 +1396,8 @@ const char *mz_error(int err)
       if (decomp_flags & TINFL_FLAG_HAS_MORE_INPUT) { \
         TINFL_CR_RETURN(state_index, TINFL_STATUS_NEEDS_MORE_INPUT); \
         if (pIn_buf_cur < pIn_buf_end) { \
-          c = *pIn_buf_cur++; \
+          c = *pIn_buf_cur; \
+          pIn_buf_cur++; \
           break; \
         } \
       } else { \
@@ -1404,7 +1405,11 @@ const char *mz_error(int err)
         break; \
       } \
     } \
-  } else c = *pIn_buf_cur++; } MZ_MACRO_END
+  } else { \
+    c = *pIn_buf_cur; \
+    pIn_buf_cur++; \
+  } \
+} MZ_MACRO_END
 
 #define TINFL_NEED_BITS(state_index, n) do { mz_uint c; TINFL_GET_BYTE(state_index, c); bit_buf |= (((tinfl_bit_buf_t)c) << num_bits); num_bits += 8; } while (num_bits < (mz_uint)(n))
 #define TINFL_SKIP_BITS(state_index, n) do { if (num_bits < (mz_uint)(n)) { TINFL_NEED_BITS(state_index, n); } bit_buf >>= (n); num_bits -= (n); } MZ_MACRO_END
@@ -1469,6 +1474,7 @@ tinfl_status tinfl_decompress(tinfl_decompressor *r, const mz_uint8 *pIn_buf_nex
   TINFL_CR_BEGIN
 
   bit_buf = num_bits = dist = counter = num_extra = r->m_zhdr0 = r->m_zhdr1 = 0; r->m_z_adler32 = r->m_check_adler32 = 1;
+  // failing here
   if (decomp_flags & TINFL_FLAG_PARSE_ZLIB_HEADER)
   {
     TINFL_GET_BYTE(1, r->m_zhdr0); TINFL_GET_BYTE(2, r->m_zhdr1);

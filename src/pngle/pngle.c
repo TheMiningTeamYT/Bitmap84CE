@@ -38,7 +38,12 @@
 #ifdef PNGLE_DEBUG
 #define debug_printf(...) fprintf(stderr, __VA_ARGS__)
 #else
+#ifdef _EZ80
+#include <debug.h>
+#define debug_printf(...) dbg_printf(__VA_ARGS__)
+#else
 #define debug_printf(...) ((void)0)
+#endif
 #endif
 
 #define PNGLE_ERROR(s) (pngle->error = (s), pngle->state = PNGLE_STATE_ERROR, -1)
@@ -517,13 +522,13 @@ static int pngle_handle_chunk(pngle_t *pngle, const uint8_t *buf, size_t len)
 		pngle->hdr.interlace   = read_uint8 (buf + 12);
 
 
-		debug_printf("[pngle]     width      : %d\n", pngle->hdr.width      );
-		debug_printf("[pngle]     height     : %d\n", pngle->hdr.height     );
-		debug_printf("[pngle]     depth      : %d\n", pngle->hdr.depth      );
-		debug_printf("[pngle]     color_type : %d\n", pngle->hdr.color_type );
-		debug_printf("[pngle]     compression: %d\n", pngle->hdr.compression);
-		debug_printf("[pngle]     filter     : %d\n", pngle->hdr.filter     );
-		debug_printf("[pngle]     interlace  : %d\n", pngle->hdr.interlace  );
+		debug_printf("[pngle]     width      : %ld\n", pngle->hdr.width      );
+		debug_printf("[pngle]     height     : %ld\n", pngle->hdr.height     );
+		debug_printf("[pngle]     depth      : %hhu\n", pngle->hdr.depth      );
+		debug_printf("[pngle]     color_type : %hhu\n", pngle->hdr.color_type );
+		debug_printf("[pngle]     compression: %hhu\n", pngle->hdr.compression);
+		debug_printf("[pngle]     filter     : %hhu\n", pngle->hdr.filter     );
+		debug_printf("[pngle]     interlace  : %hhu\n", pngle->hdr.interlace  );
 
 		/*
             Color    Allowed    Interpretation                            channels
@@ -572,7 +577,7 @@ static int pngle_handle_chunk(pngle_t *pngle, const uint8_t *buf, size_t len)
 		// parse & decode IDAT chunk
 		if (len < 1) return 0;
 
-		debug_printf("[pngle]   Reading IDAT (len %zd / chunk remain %u)\n", len, pngle->chunk_remain);
+		debug_printf("[pngle]   Reading IDAT (len %zd / chunk remain %lu)\n", len, pngle->chunk_remain);
 
 		size_t in_bytes  = len;
 		size_t out_bytes = pngle->avail_out;
@@ -699,7 +704,7 @@ static int pngle_feed_internal(pngle_t *pngle, const uint8_t *buf, size_t len)
 
 		pngle->crc32 = mz_crc32(MZ_CRC32_INIT, (const mz_uint8 *)(buf + 4), 4);
 
-		debug_printf("[pngle] Chunk '%.4s' len %u\n", buf + 4, pngle->chunk_remain);
+		debug_printf("[pngle] Chunk '%.4s' len %lu\n", buf + 4, pngle->chunk_remain);
 
 		pngle->state = PNGLE_STATE_HANDLE_CHUNK;
 
@@ -799,11 +804,11 @@ static int pngle_feed_internal(pngle_t *pngle, const uint8_t *buf, size_t len)
 		uint32_t crc32 = read_uint32(buf);
 
 		if (crc32 != pngle->crc32) {
-			debug_printf("[pngle] CRC: %08x vs %08x => NG\n", crc32, (uint32_t)pngle->crc32);
+			debug_printf("[pngle] CRC: %08lx vs %08lx => NG\n", crc32, (uint32_t)pngle->crc32);
 			return PNGLE_ERROR("CRC mismatch");
 		}
 
-		debug_printf("[pngle] CRC: %08x vs %08x => OK\n", crc32, (uint32_t)pngle->crc32);
+		debug_printf("[pngle] CRC: %08lx vs %08lx => OK\n", crc32, (uint32_t)pngle->crc32);
 		pngle->state = PNGLE_STATE_FIND_CHUNK_HEADER;
 
 		// XXX:
